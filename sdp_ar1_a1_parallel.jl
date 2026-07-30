@@ -50,6 +50,7 @@ const TEST_PATH     = joinpath(DATA_DIR, "test")
     using CSV, DataFrames, Dates
     using ProgressMeter
     using Statistics
+    using LinearAlgebra  # pinv for OLS regression
 
     include(joinpath($EMSX_DIR, "examples", "sdp", "function.jl"))
     include(joinpath($EMSX_DIR, "examples", "sdp", "calibrate.jl"))
