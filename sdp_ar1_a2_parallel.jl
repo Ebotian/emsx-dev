@@ -230,15 +230,6 @@ const TEST_PATH     = joinpath(DATA_DIR, "test")
         # Reset final_cost to nothing (clean state)
         sdp_model.final_cost = nothing
 
-        # CRITICAL: The EMSx simulator resets soc=0 at each period boundary.
-        # The periodic VI gives V[horizon+1] = V[1] ≠ 0, which makes the
-        # controller keep battery charge at end of week — but the simulator
-        # discards it, wasting energy.
-        # Fix: keep the improved interior value functions (steps 1..horizon),
-        # but reset the terminal step back to 0 so the last decision empties
-        # the battery, matching the simulator's week-reset behavior.
-        vf.functions[horizon+1, ..] = zeros(size(vf[1]))
-
         return vf
     end
 
@@ -364,6 +355,53 @@ const TEST_PATH     = joinpath(DATA_DIR, "test")
         )
         return control[1]
     end
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # A₂: Continuous-SOC simulation (soc carries across periods)
+    # ══════════════════════════════════════════════════════════════════════════
+    # The stock EMSx simulator resets soc=0 at each period boundary.
+    # For A₂ (periodic average-cost SDP), the value function assumes
+    # continuous operation. This custom simulator passes soc from the
+    # end of one period to the start of the next, matching the SDP's
+    # periodic boundary condition.
+    # ───────────────────────────────────────────────────────────────────────────
+
+    function simulate_site_continuous(controller::EMSx.AbstractController,
+                                        site::EMSx.Site, prices::EMSx.Prices)
+        test_data, site = EMSx.load_site_data(site)
+        controller = EMSx.initialize_site_controller(controller, site, prices)
+        periods = unique(test_data[!, :period_id])
+        simulations = EMSx.Simulation[]
+
+        # Continuous SOC: carries across periods (was 0.0 each period in stock)
+        state_of_charge = 0.0
+
+        for period_id in periods
+            test_data_period = test_data[test_data.period_id .== period_id, :]
+            period = EMSx.Period(string(period_id), test_data_period, site)
+            h = size(period.data, 1) - 96
+            id = EMSx.Id(period.site.id, period.id, prices.name, string(typeof(controller)))
+            result = EMSx.Result(h)
+            timer = zeros(h)
+
+            for t in 1:h
+                information = EMSx.Information(t, prices, period, state_of_charge)
+                timing = @elapsed control = EMSx.compute_control(controller, information)
+
+                stage_cost, state_of_charge = EMSx.apply_control(t, h, prices, period,
+                                                                  state_of_charge, control)
+                result.cost[t] = stage_cost
+                result.control[t] = control
+                result.soc[t] = state_of_charge
+                timer[t] = timing
+            end
+
+            push!(simulations, EMSx.Simulation(result, timer, id))
+        end
+
+        EMSx.save_simulations(site, simulations)
+        return nothing
+    end
 end  # @everywhere
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -401,16 +439,37 @@ function calibrate_sites_parallel(path_to_save_folder, path_to_price_csv,
 end
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Phase 2: Parallel Simulation
+# Phase 2: Parallel Simulation (continuous SOC across periods)
 # ══════════════════════════════════════════════════════════════════════════════
 function simulate_sites_parallel(controller, path_to_save_folder, path_to_price_csv,
                                  path_to_metadata_csv, path_to_test_data,
                                  path_to_train_data)
-    @info "Phase 2/3: Simulation — $(nworkers()) workers, work-stealing"
+    @info "Phase 2/3: Simulation (continuous SOC) — $(nworkers()) workers, work-stealing"
 
-    EMSx.simulate_sites_parallel(controller, path_to_save_folder,
-                                  path_to_price_csv, path_to_metadata_csv,
-                                  path_to_test_data, path_to_train_data)
+    mkpath(path_to_save_folder)
+    prices = EMSx.load_prices(path_to_price_csv)
+    sites = EMSx.load_sites(path_to_metadata_csv, path_to_test_data,
+                           path_to_train_data, path_to_save_folder)
+
+    to_do = length(sites)
+
+    @sync begin
+        for p in workers()
+            @async begin
+                while true
+                    idx = to_do
+                    to_do -= 1
+                    if idx <= 0
+                        break
+                    end
+                    println("processing a new job - jobs left in queue : $(idx-1) / $(length(sites))")
+                    _ = remotecall_fetch(simulate_site_continuous, p, controller, sites[idx], prices)
+                end
+            end
+        end
+    end
+
+    EMSx.group_all_simulations(sites)
     @info "Simulation complete."
     return nothing
 end
