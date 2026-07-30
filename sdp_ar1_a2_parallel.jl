@@ -230,6 +230,15 @@ const TEST_PATH     = joinpath(DATA_DIR, "test")
         # Reset final_cost to nothing (clean state)
         sdp_model.final_cost = nothing
 
+        # CRITICAL: The EMSx simulator resets soc=0 at each period boundary.
+        # The periodic VI gives V[horizon+1] = V[1] ≠ 0, which makes the
+        # controller keep battery charge at end of week — but the simulator
+        # discards it, wasting energy.
+        # Fix: keep the improved interior value functions (steps 1..horizon),
+        # but reset the terminal step back to 0 so the last decision empties
+        # the battery, matching the simulator's week-reset behavior.
+        vf.functions[horizon+1, ..] = zeros(size(vf[1]))
+
         return vf
     end
 
