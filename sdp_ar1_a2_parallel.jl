@@ -52,7 +52,7 @@ const TEST_PATH     = joinpath(DATA_DIR, "test")
     using ProgressMeter
     using Statistics
     using LinearAlgebra
-    using Interpolations
+    using Interpolations: linear_interpolation, Line
 
     include(joinpath($EMSX_DIR, "examples", "sdp", "function.jl"))
     include(joinpath($EMSX_DIR, "examples", "sdp", "calibrate.jl"))
@@ -63,8 +63,8 @@ const TEST_PATH     = joinpath(DATA_DIR, "test")
     const horizon = 672  # 7 days × 96 steps/day
     const NZ = 20        # z grid points (net demand dimension)
     const K_NOISE = 10   # number of noise levels
-    const MAX_VI_ITERS = 5     # max value iteration rounds
-    const VI_TOL = 1e-3        # convergence tolerance on ‖V⁽ⁿ⁾[1] - V⁽ⁿ⁻¹⁾[1]‖
+    const MAX_VI_ITERS = 3     # max value iteration rounds (shape converges in 2)
+    const VI_TOL = 1e-3        # convergence tolerance on shape (de-meaned V₁)
 
     # ══════════════════════════════════════════════════════════════════════════
     # A₁: Deterministic 1D DP Optimal Quantization (inherited)
@@ -209,13 +209,19 @@ const TEST_PATH     = joinpath(DATA_DIR, "test")
             # Re-run backward DP with new terminal value
             vf = StoOpt.compute_value_functions(sdp_model)
 
-            # Check convergence
-            diff = maximum(abs.(vf[1] .- prev_v1))
-            avg_diff = mean(abs.(vf[1] .- prev_v1))
-            @info "    VI iter $iter: max|ΔV₁| = $(round(diff, digits=4)), mean|ΔV₁| = $(round(avg_diff, digits=4))"
+            # Average-cost VI: V grows by a constant g* each iteration.
+            # Convergence is on the SHAPE (de-meaned), not absolute values.
+            cur_v1 = vf[1]
+            cur_mean = mean(cur_v1)
+            prev_mean = mean(prev_v1)
+            cur_centered = cur_v1 .- cur_mean
+            prev_centered = prev_v1 .- prev_mean
+            shape_diff = maximum(abs.(cur_centered .- prev_centered))
+            g_estimate = cur_mean - prev_mean
+            @info "    VI iter $iter: shape_diff=$(round(shape_diff, digits=4)), g*=$(round(g_estimate, digits=2))"
 
-            if diff < tol
-                @info "    VI converged at iter $iter (diff=$(round(diff, digits=6)) < tol=$tol)"
+            if shape_diff < tol
+                @info "    VI shape converged at iter $iter"
                 break
             end
             prev_v1 = copy(vf[1])
