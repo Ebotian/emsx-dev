@@ -1,0 +1,614 @@
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% COULEURS 
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newrgbcolor{Violet}{0.8 0.1 0.9}
+% \newrgbcolor{Jaune}{1 1 0}
+% \newrgbcolor{Lagon}{0 1. 1}
+% \newrgbcolor{LemonChiffon}{0. 0.2 0.2}
+% \newrgbcolor{LightBlue}{0.68 0.85 0.9}
+% \newrgbcolor{darkblue}{0.1 0.1 1}
+% \newrgbcolor{LucRed}{0.8 0.2 0.2}
+% \newrgbcolor{myred}{0.8 0.2 0.2}
+
+\newcommand{\noir}[1]{\textcolor{black}{#1}}
+\newcommand{\noire}[1]{\textcolor{black}{#1}}
+\newcommand{\rouge}[1]{\textcolor{red}{#1}}
+\newcommand{\bleue}[1]{\textcolor{blue}{#1}}
+\newcommand{\bleu}[1]{\alert{#1}}
+\newcommand{\verte}[1]{\textcolor{green}{#1}}
+\newcommand{\blanc}[1]{\textcolor{white}{#1}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% NOUVEAUX ENVIRONNEMENTS                                  %%%%%
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{PETIT}{%
+\small }%  
+{\normalsize}
+
+\newenvironment{Petit}{%
+\footnotesize }%  
+{\normalsize}
+
+\newenvironment{petit}{%
+\tiny }%
+{\normalsize}
+
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{proposition}[theorem]{Proposition}
+% \newtheorem{definition}[theorem]{Definition}
+% \newtheorem{lemma}[theorem]{Lemma}
+% \newtheorem{corollary}[theorem]{Corollary}
+% \newtheorem{remark}[theorem]{Remark}
+\newtheorem{assumption}{Assumption}
+
+ % \newenvironment{proof}{\small{\bf Proof.}}%
+ % {\hfill$\Box$\normalsize\bigskip}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%% GENERALITES %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\subsubsubsection}[1]{\paragraph{#1.}}
+\newcommand{\subsubsubsubsection}[1]{\medskip\noindent\textit{#1}.}
+
+\newcommand{\eqsepv}{\; , \enspace}       
+\newcommand{\eqfinv}{\; ,}                
+\newcommand{\eqfinp}{\; .}                
+\newcommand{\eqfinpv}{\; ;}               
+ 
+\newcommand{\ind}[1]{_{#1}}     % indice
+\newcommand{\IND}[1]{(#1)}
+
+\renewcommand{\bar}{\overline}
+\renewcommand{\tilde}{\widetilde}
+\newcommand{\transp}{^{\top}}
+\newcommand{\upper}{^{\sharp}}
+\newcommand{\llower}{^{\flat}}
+\newcommand{\lloweropt}{^{\flat,\star}}
+
+\newcommand{\wrt}{\text{w.r.t.}}                            % ``w.r.t.''
+\newcommand{\IFF}{iff~} 
+%\newcommand{\newblock}{}
+\newcommand{\mtext}[1]{\,\mbox{#1}\,} %text in maths
+%\newcommand{\text#1{\quad\mbox{#1}\quad} %wide text in maths
+\newcommand{\ds}{\displaystyle}
+%\newcommand{\eqref}[1]{(\ref{#1})}
+
+\newcommand{\module}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\|#1\|}
+% \newcommand{\norme}[1]{\|#1\|}
+% \newcommand{\norm}[2]{\|#1\|_{#2}}
+\newcommand{\defegal}{:=}
+%\newcommand{\matrix}{M}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% Parenth\`{e}ses, crochets et accolades
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\sequence}[2]{\left\{#1\right\}_{#2}}           % Suite
+\newcommand{\proscal}[2]{\left\langle#1\:,#2\right\rangle}  % Produit scalaire
+\newcommand{\bscal}[2]{\big\langle#1\:,#2\big\rangle}       % Produit scalaire
+
+\newcommand{\doublecrochet}[1]{\llbracket #1 \rrbracket}    %{[[#1]]}
+
+\newcommand{\np}[1]{(#1)}                                   % Parenth\`{e}se normal
+\newcommand{\bp}[1]{\big(#1\big)}                           % Parenth\`{e}se big
+\newcommand{\Bp}[1]{\Big(#1\Big)}                           % Parenth\`{e}se Big
+\newcommand{\bgp}[1]{\bigg(#1\bigg)}                        % Parenth\`{e}se bigg
+\newcommand{\Bgp}[1]{\Bigg(#1\Bigg)}                        % Parenth\`{e}se Bigg
+
+\newcommand{\dc}[1]{[ \! [ #1 ] \! ]}                       % Double crochet
+\newcommand{\nc}[1]{[#1]}                                   % Crochet normal
+\newcommand{\bc}[1]{\big[#1\big]}                           % Crochet big
+\newcommand{\Bc}[1]{\Big[#1\Big]}                           % Crochet Big
+\newcommand{\bgc}[1]{\bigg[#1\bigg]}                        % Crochet bigg
+\newcommand{\Bgc}[1]{\Bigg[#1\Bigg]}                        % Crochet Bigg
+
+\newcommand{\na}[1]{\{#1\}}                                 % Accolade normal
+\newcommand{\ba}[1]{\big\{#1\big\}}                         % Accolade big
+\newcommand{\Ba}[1]{\Big\{#1\Big\}}                         % Accolade Big
+\newcommand{\bga}[1]{\bigg\{#1\bigg\}}                      % Accolade bigg
+\newcommand{\Bga}[1]{\Bigg\{#1\Bigg\}}                      % Accolade Bigg
+
+\newcommand{\normdelim}[1]{\np{#1}}                         % Taille ``normal''
+\newcommand{\bigdelim}[1]{\bp{#1}}                          % Taille ``big''
+\newcommand{\Bigdelim}[1]{\Bp{#1}}                          % Taille ``Big''
+\newcommand{\biggdelim}[1]{\bgp{#1}}                        % Taille ``bigg''
+\newcommand{\Biggdelim}[1]{\Bgp{#1}}                        % Taille ``Bigg''
+\newcommand{\vardelim}[1]{\left(#1\right)}                  % Taille ``variable''
+
+\newcommand{\normdelims}[2]{\normdelim{#1\mid#2}}           % avec s\'{e}parateur
+\newcommand{\bigdelims}[2]{\bigdelim{#1\ \big|\ #2}}        %
+\newcommand{\Bigdelims}[2]{\Bigdelim{#1\ \Big|\ #2}}        %
+\newcommand{\biggdelims}[2]{\biggdelim{#1\ \bigg|\ #2}}     %
+\newcommand{\Biggdelims}[2]{\Biggdelim{#1\ \Bigg|\ #2}}     %
+\newcommand{\vardelims}[2]{\vardelim{#1\mid#2}}             %
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% ENSEMBLES ET SYMBOLES
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\RR}{{\mathbb R}} %"ensemble des reels"   
+\newcommand{\NN}{{\mathbb N}} %"ensemble des entiers naturels"  
+\newcommand{\ZZ}{{\mathbb Z}} %"ensemble des entiers relatifs"  
+\newcommand{\CC}{{\mathbb C}} 
+\newcommand{\DD}{{\mathbb D}} 
+\newcommand{\BB}{{\mathbb B}} %"symbole d'esperance mathematique"
+\newcommand{\EE}{{\mathbb E}} %"symbole d'esperance mathematique"
+\newcommand{\FF}{{\mathbb F}} %"symbole d'esperance mathematique"
+\def\HH{\mathbb H} % et non pas \newcommand{\HH}{{\mathbb H}} 
+\newcommand{\PP}{{\mathbb P}} %"symbole de probabilite"
+\newcommand{\QQ}{{\mathbb Q}} %"symbole de probabilite"
+\newcommand{\TT}{{\mathbb T}} 
+\newcommand{\UU}{{\mathbb U}} 
+\newcommand{\VV}{{\mathbb V}} 
+\newcommand{\WW}{{\mathbb W}} 
+\newcommand{\XX}{{\mathbb X}} 
+\newcommand{\YY}{{\mathbb Y}} 
+\newcommand{\1}{{\mathbf 1}}
+
+\newcommand{\espace}[1]{\mathbb{#1}}                        % Espace de Hilbert
+\newcommand{\espacea}[1]{\mathbb{#1}}                       % Espace d'arriv\'{e}e
+\newcommand{\espacef}[1]{\mathcal{#1}}                      % Espace fonctionnel
+\newcommand{\defset}[2]{\left\{#1\:\left|\:#2\right.\right\}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% THÉORIE DU CONTRÔLE 
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\control}{u}
+\newcommand{\Control}{U}
+\newcommand{\CONTROL}{{\mathbb U}} 
+
+\newcommand{\state}{x}
+\newcommand{\State}{X}
+\newcommand{\STATE}{{\mathbb X}}
+
+\newcommand{\uncertain}{w}
+\newcommand{\Uncertain}{W}
+\newcommand{\UNCERTAIN}{{\mathbb W}} 
+
+\newcommand{\dynamics}{f}
+%\newcommand{\Dynamics}{F}
+\newcommand{\Dynamics}[2]{f_{#1:#2}}
+\newcommand{\tildeDynamics}[2]{\tilde{f}_{#1:#2}}
+
+% \newcommand{\Output}{\mathtt{Obs}}
+% \newcommand{\output}{{\Violet y}}
+% \newcommand{\output}{y}
+
+%% Time
+
+\newcommand{\horizon}{T}
+\newcommand{\tinitial}{t_0}
+\newcommand{\tinitialplusone}{\tinitial +1}
+\newcommand{\tinitialplustwo}{\tinitial +2}
+\newcommand{\tun}{r}
+\newcommand{\tbis}{s}
+\newcommand{\tter}{t}
+
+\newcommand{\interval}[2]{\np{{#1}\!:\!{#2}}}
+\newcommand{\ic}[1]{\llbracket #1 \rrbracket}
+%\newcommand{\inic}[1]{\in \llbracket #1 \rrbracket}
+\newcommand{\inic}[2]{=#1,\ldots,#2}
+
+%% Strategies 
+
+\newcommand{\policy}{\lambda}
+\newcommand{\Policy}{\Lambda}
+\newcommand{\POLICY}{\Lambda}
+\newcommand{\strategy}{\policy}
+\newcommand{\STRATEGY}{\POLICY}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% VIABILITE
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\dec}{\BB} % contraintes_decision
+\newcommand{\decset}[1]{\dec\big(#1,x(#1)\big)}
+\newcommand{\obj}{\mathbb{D}}
+\newcommand{\Uad}{{\cal U}^{\rm ad}} 
+\newcommand{\XUad}{{\cal T}^{\rm ad}}
+\newcommand{\sdo}{{\mathbb A}} % state domain
+\newcommand{\target}{\sdo(\horizon)}
+
+\newcommand{\Ut}{\dec\big(t,\state(t)\big)}
+\newcommand{\Us}{\dec(s,\state(s))}
+\newcommand{\Utx}{\dec(t,x)}
+\newcommand{\Usx}{\dec(s,x)}
+\newcommand{\Ux}[1]{\dec^{#1}(\state)}
+\newcommand{\UT}[1]{\dec(t,#1)}
+
+\newcommand{\viab}{\mathbb{V}{\rm iab}}
+\newcommand{\inv}{{\rm Inv}}
+\newcommand{\vviab}{\mbox{\tiny viab}}
+\newcommand{\decviab}{\dec^{\vviab}} 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% OPTIMISATION
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\argmin}{\mathop{\arg\min}} 
+\newcommand{\argmax}{\mathop{\mathrm{argmax}}}
+%\renewcommand{\sup}{\max}
+%\renewcommand{\inf}{\min}
+\newcommand{\Min}{\min}
+\newcommand{\Max}{\max}
+\newcommand{\MAX}{\max}
+\newcommand{\MIN}{\min}
+
+\newcommand{\opt}{^{\star}}             % optimal
+\newcommand{\adm}{^{\mbox \rm ad}}      % admissible
+
+\newcommand{\criterion}{j}                                  % Crit\`{e}re
+\newcommand{\Criterion}{J}                                  % Crit\`{e}re apres 
+\newcommand{\CRITERION}{\tilde{\jmath}} 
+   
+\newcommand{\coutint}{L}                                    % Co\^{u}t int\'{e}gral
+\newcommand{\coutfin}{K}                                    % Co\^{u}t final
+
+\newcommand{\Regret}{r}
+
+\newcommand{\VALUE}{V}
+\newcommand{\Value}{V}
+
+\newcommand{\Hamiltonian}{{\cal H}}
+\newcommand{\adjoint}{q}
+
+\newcommand{\decrule}{\mathtt{Pol}}
+% \usepackage{euscript}
+\newcommand{\feedback}[1]{\EuScript{#1}}
+\newcommand{\feedbackset}{\EuScript{\Control}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% PROBABILITES
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\prbt}{\mathbb{P}}                              % proba  du triplet
+\newcommand{\mathscr}{\EuScript}
+\newcommand{\tribu}[1]{\mathscr{#1}}                        % Tribu
+\newcommand{\trib}{{\cal F}}
+\newcommand{\soustribu}{{\cal G}}
+\newcommand{\borel}[1]{\tribu{B}_{#1}^{\mathrm{o}}}
+
+\newcommand{\epro}{(\Omega,\trib,\prbt)}
+
+\newcommand{\va}[1]{\mathbf{#1}}
+\newcommand{\RV}{\mathtt{RV}}
+\newcommand{\Rv}{\mathtt{Rv}}
+
+\newcommand{\filtration}[1]{\mathbb{#1}}                    % Filtration
+
+%% Probabilit\'{e}
+
+\newcommand{\nprob}[1]{\prbt\normdelim{#1}}                 % Probabilit\'{e} normal
+\newcommand{\bprob}[1]{\prbt\bigdelim{#1}}                  % Probabilit\'{e} big
+\newcommand{\Bprob}[1]{\prbt\Bigdelim{#1}}                  % Probabilit\'{e} Big
+\newcommand{\bgprob}[1]{\prbt\biggdelim{#1}}                % Probabilit\'{e} bigg
+\newcommand{\Bgprob}[1]{\prbt\Biggdelim{#1}}                % Probabilit\'{e} Bigg
+
+%% Esp\'{e}rance
+
+\newcommand{\espe}{\mathbb{E}}                              % Symbole
+\newcommand{\esper}[1]{\espe\normdelim{#1}}
+\newcommand{\expect}[1]{\espe_{#1}}
+
+\newcommand{\nesp}[2][]{\espe_{#1}\nc{#2}}           % Esp\'{e}rance normal
+\newcommand{\besp}[2][]{\espe_{#1}\bc{#2}}            % Esp\'{e}rance big
+\newcommand{\Besp}[2][]{\espe_{#1}\Bc{#2}}            % Esp\'{e}rance Big
+\newcommand{\bgesp}[2][]{\espe_{#1}\bgc{#2}}          % Esp\'{e}rance bigg
+\newcommand{\Bgesp}[2][]{\espe_{#1}\Bgc{#2}}          % Esp\'{e}rance Bigg
+%
+% \newcommand{\nesp}[2][]{\espe_{#1}\normdelim{#2}}           % Esp\'{e}rance normal
+% \newcommand{\besp}[2][]{\espe_{#1}\bigdelim{#2}}            % Esp\'{e}rance big
+% \newcommand{\Besp}[2][]{\espe_{#1}\Bigdelim{#2}}            % Esp\'{e}rance Big
+% \newcommand{\bgesp}[2][]{\espe_{#1}\biggdelim{#2}}          % Esp\'{e}rance bigg
+% \newcommand{\Bgesp}[2][]{\espe_{#1}\Biggdelim{#2}}          % Esp\'{e}rance Bigg
+
+%% Esp\'{e}rance conditionnelle
+
+\newcommand{\nespc}[3][]{\espe_{#1}\normdelims{#2}{#3}}     % Esp\'{e}rance cond. normal
+\newcommand{\bespc}[3][]{\espe_{#1}\bigdelims{#2}{#3}}      % Esp\'{e}rance cond. big
+\newcommand{\Bespc}[3][]{\espe_{#1}\Bigdelims{#2}{#3}}      % Esp\'{e}rance cond. Big
+\newcommand{\bgespc}[3][]{\espe_{#1}\biggdelims{#2}{#3}}    % Esp\'{e}rance cond. bigg
+\newcommand{\Bgespc}[3][]{\espe_{#1}\Biggdelims{#2}{#3}}    % Esp\'{e}rance cond. Bigg
+
+%% Variance
+
+\newcommand{\vari}{\mathop{\mathsf{var}}}
+\newcommand{\cov}{\mathop{\mathsf{cov}}}
+\newcommand{\dispersion}{\mathop{\mathsf{D}}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% UNCERTITUDES
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\uncertainty}{\omega}
+\newcommand{\Uncertainty}{\Omega}
+\newcommand{\Om}{\Omega}
+\newcommand{\om}{\omega}
+
+\newcommand{\scenario}{s}
+\newcommand{\Scenario}{S}
+\newcommand{\SCENARIO}{\mathbb{S}}
+\newcommand{\Scenarios}{\mathbb{S}}
+
+% \newcommand{\unc{\overline{\UNCERTAIN}}
+% \newcommand{\unc{\mathbb S} % constraints domain
+% \newcommand{\Unc{\Omega} % contraintes incertitude
+
+\def\scheme{%
+\pstree[treemode=R,levelsep=3cm,radius=2pt]{\Tc{2pt}}{%
+\pstree{\TC*}{%
+\pstree{\TC*}{\Tr{HHH} \Tr{HHC}}
+\pstree{\TC*}{\Tr{HCH} \Tr{HCC}}}
+\pstree{\TC*}{%
+\pstree{\TC*}{\Tr{CHH} \Tr{CHC}}
+\pstree{\TC*}{\Tr{CCH} \Tr{CCC}}}}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% MULTI-AGENT
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%PC%%\newcommand{\CRITERION{\tilde{\jmath}}
+%%PC%%\newcommand{\Criterion{\overline{\jmath}}
+%%PC%%\newcommand{\Qps{\text{${\mathbb Q}$-}\as}
+
+%% Agents 
+
+\newcommand{\agent}{a}
+\newcommand{\agentbis}{b}
+\newcommand{\agentter}{c}
+\newcommand{\agentcuarto}{d}
+\newcommand{\AGENT}{A} 
+
+\newcommand{\SubAgents}{B}
+\newcommand{\SubAgentsTwo}{C}
+\newcommand{\SubAgentsThree}{C'}
+
+\newcommand{\NP}{N}
+\newcommand{\player}{p}
+\newcommand{\playerbis}{q}
+\newcommand{\playerter}{r}
+\newcommand{\PLAYER}{P}
+
+\newcommand{\Principal}{\mathtt{Pr}}
+\newcommand{\Agent}{\mathtt{Ag}}
+
+%% Sets and fields 
+
+\newcommand{\history}{h}
+\newcommand{\History}{H}
+\newcommand{\HISTORY}{\mathbb{H}}
+
+\newcommand{\Nature}{N}
+\newcommand{\NatureField}{F}
+
+\newcommand{\Decision}{D}
+\newcommand{\Information}{I}
+
+%% Relations 
+
+\newcommand{\subsys}{\mathfrak{S}}
+\newcommand{\preced}{\mathfrak{P}}
+\newcommand{\memory}{\mathfrak{M}}
+\newcommand{\decisionmemory}{{\mathfrak{D}}}
+\newcommand{\order}{\mathfrak{O}}
+\newcommand{\relation}{\mathfrak{R}}
+%\newcommand{\partitionfield}{\soustribu}
+
+%% Operations on relations 
+
+\newcommand{\complementary}[1]{{#1}\compl}
+
+\newcommand{\pullback}[1]{\left(#1\right)_{\star}}
+\newcommand{\pushback}[1]{\left(#1\right)^{\star}}
+
+\newcommand{\crochet}[1]{\left< #1 \right>_{\preced}}
+\newcommand{\bracket}[1]{\left< #1 \right>_{\memory}} 
+%\newcommand{\doublecrochet}[1]{\left< #1 \right>_{\decisionmemory}} 
+
+\newcommand{\plusfine}{\succeq}
+\newcommand{\moinsfine}{\preceq}
+
+%% Products of sets and fields 
+
+\newcommand{\oproduit}[2]{#2 \otimes #1}
+\newcommand{\produit}[2]{#2 \times #1}
+\newcommand{\oproduct}[2]{#2 \otimes #1}
+\newcommand{\product}[2]{#2 \times #1}
+\newcommand{\othreeproduct}[3]{#3 \otimes #2 \otimes #1}
+\newcommand{\threeproduct}[3]{#3 \times #2 \times #1}
+%
+\newcommand{\couple}[2]{\np{#2,#1}}
+\newcommand{\bigcouple}[2]{\big(#2,#1\big)}
+\newcommand{\Bigcouple}[2]{\Big(#2,#1\Big)}
+\newcommand{\bcouple}[2]{\Bp{#2,#1}}
+\newcommand{\Bcouple}[2]{\Bp{#2,#1}}
+\newcommand{\triplet}[3]{\np{#3,#2,#1}}
+\newcommand{\btriplet}[3]{\bp{#3,#2,#1}}
+\newcommand{\Btriplet}[3]{\Bp{#3,#2,#1}}
+
+%% 
+
+\newcommand{\hatcontrol}{M} 
+\newcommand{\solutionmap}{S} 
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%                                                          %%%%%
+%%%%% BIOECONOMIE 
+%%%%%                                                          %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Biological models 
+
+\newcommand{\mortal}{\mu}
+\newcommand{\fertility}{\gamma}
+\newcommand{\biomass}{B}
+\newcommand{\biology}{\mathtt{Biol}}
+
+%% Economic models 
+
+\newcommand{\interest}{r_{e}} % taux d'intérêt
+\newcommand{\discount}{(\frac{1}{1+\interest})}
+\newcommand{\Discount}{\frac{1}{1+\interest}}
+\newcommand{\DISCOUNT}{\delta}
+
+%\newcommand{\certainty_equiv}{\widehat}
+
+\newcommand{\price}{p}
+\newcommand{\effort}{E}
+\newcommand{\Effort}{E}
+\newcommand{\Catch}{\mathtt{Catch}}
+\newcommand{\catch}{h}
+\newcommand{\rent}{\mathtt{Rent}}
+\newcommand{\profit}{P}
+\newcommand{\Production}{\mathtt{Yield}}
+\newcommand{\production}{Y}
+
+%% CO2
+
+%\newcommand{\co2}{\textsc{co}$_2$}
+%\newcommand{\CO2}{\textsc{co}$_2$}
+\newcommand{\ghg}{\textsc{ghg}}
+\newcommand{\BAU}{{\rm bau}}
+\newcommand{\GWP}{\textsc{gwp}}
+\newcommand{\growth}{g}
+\newcommand{\Emissions}{\mathtt{Emiss}}
+\newcommand{\Damage}{\mathtt{Damage}}
+
+%% Bioeconomic models
+
+\newcommand{\SY}{\mathop{\mathtt{Sust}}}
+\newcommand{\MSY}{\textsc{msy}}
+\newcommand{\MSE}{\textsc{mse}}
+\newcommand{\PPE}{\textsc{ppe}}
+\newcommand{\CPE}{\textsc{cpe}}
+
+\newcommand{\Consumption}{\mathtt{Consum}}
+\newcommand{\consumption}{C}
+\newcommand{\Environment}{\mathtt{Envir}}
+\newcommand{\environment}{E}
+
+%% Stock models
+
+\newcommand{\stock}{S}
+\newcommand{\volume}{\stock}
+\newcommand{\turbined}{q}
+\newcommand{\spilled}{r}
+\newcommand{\inflow}{a}
+
+\newcommand{\purchasing}{c}
+\newcommand{\shortage}{b}
+\newcommand{\holding}{h}
+
+%% Fisheries models
+
+\newcommand{\mature}{\gamma}
+\newcommand{\weight}{\mu}
+\newcommand{\abundance}{N}
+\newcommand{\multiplier}{\lambda}
+\newcommand{\exploitation}{F}
+\newcommand{\mortality}{M}
+\newcommand{\SSB}{\mathtt{SSB}}
+\newcommand{\spr}{\mathtt{spr}}
+%\newcommand{\benefit}{B}
+
+% \newcommand{\spawning_stock_biomass}{{\sf SSB}} 
+% \newcommand{\fishing_mortality}{{\sf F}} 
+\newcommand{\stockrecruitment}{stock-recruitment} %{{\sf S-R}}
+%\renewcommand{\varphi}{\mathtt{S/R}}
+\newcommand{\SR}{\mathtt{S/R}}
+%\renewcommand{\SR}{\mathop{\mathsf{S/R}}}
+
+\newcommand{\ICES}{\textsc{ices}}
+\newcommand{\ices}{{\sf ices}}
+
+\newcommand{\rref}{\llim} %{{\sf ref}}
+\newcommand{\Bref}{\Blim} %{B_{{\sf ref}}}
+\newcommand{\Fref}{\Flim} %{F_{{\sf ref}}}
+\newcommand{\pa}{{\sf pa}}
+\newcommand{\Bpa}{B_{\pa}}
+\newcommand{\Fpa}{F_{\pa}}
+\newcommand{\llim}{{\sf lim}}
+\newcommand{\Blim}{B_{\llim}}
+\newcommand{\Flim}{F_{\llim}}
+\newcommand{\PA}{{\sf PA}}
+\newcommand{\LLIM}{\textsc{lim}}
+\newcommand{\LPA}{\textsc{pa}}
+
+\newcommand{\ypr}{{\sf ypr}}
+\newcommand{\mmin}{{\sf min}}
+\newcommand{\mmax}{{\sf max}}
+\newcommand{\gm}{{\sf gm}}
+\newcommand{\mean}{{\sf mean}}
+\newcommand{\msy}{{\sf msy}}
+
+\newcommand{\PVA}{\textsc{pva}}
+\newcommand{\CVA}{\textsc{cva}}
+
+\newcommand{\threshold}[1]{{\Violet #1}} 
+\newcommand{\equil}{_{\textsc{e}}}
+
+\newcommand{\utility}{\mathtt{L}}
+\newcommand{\util}{\mathtt{L}}
+\newcommand{\utilfin}{\mathtt{K}}
+
+\newcommand{\cost}{c}
+\newcommand{\Cost}{\mathtt{Cost}}
+\newcommand{\Costfin}{\mathtt{CostFin}}
+
+\newcommand{\Payoff}{\mathtt{Payoff}}
+\newcommand{\payoff}{\mathtt{Payoff}}
+\newcommand{\reward}{\mathtt{Reward}}
+
+

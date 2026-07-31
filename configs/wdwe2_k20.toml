@@ -1,0 +1,33 @@
+schema_version = 1
+
+[experiment]
+controller = "wdwe2_periodic_ar1"
+tag = "local_wdwe2_k20_locked_v1"
+seed = 20260731
+expected_sites = 70
+
+[parameters]
+dx = 0.1
+du = 0.1
+k_noise = 20
+margin = 0.5
+nz = 20
+horizon = 672
+max_vi_iters = 3
+vi_tol = 0.001
+
+[execution]
+workers = 12
+formal = true
+
+[inputs]
+input_manifest = "baselines/wdwe2_k20/input-manifest.tsv"
+prices = "EMSx.jl/metadata/edf_prices.csv"
+metadata = "dataset/metadata.csv"
+train = "dataset/train"
+test = "dataset/test"
+
+[acceptance]
+expected_mean_score = 0.7676755785921663
+mean_atol = 1.0e-6
+site_atol = 1.0e-6

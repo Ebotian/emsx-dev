@@ -1,0 +1,5 @@
+captured_at_utc = "2026-07-30T18:15:47.100"
+diff_sha256 = "acfc5821be1bb942aedf8c5908be51cda33809bf2bf78d63459a5983a7506b5d"
+nested_head = "4a385f29da0c46cb19ae1f0d8a6f4f93660bde29"
+path = "examples/sdp/function.jl"
+schema_version = 1

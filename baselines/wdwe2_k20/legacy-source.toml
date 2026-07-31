@@ -1,0 +1,16 @@
+input_manifest_path = "baselines/wdwe2_k20/input-manifest.tsv"
+input_manifest_sha256 = "82978fbc20bd8f4ec9613375380fe6c10ccff6f60c00dad7f4fc94c843e7dddc"
+legacy_environment_lock = "not_recorded_by_legacy_run"
+legacy_log_bytes = 21201
+legacy_log_path = "results_sdp/sweep_wdwe2_k20.log"
+legacy_log_sha256 = "e0793dcb6fb50273731ea9a2f4c42f5627f8b89bf23a725ffbfb83b423839fd8"
+legacy_score_bytes = 55119296
+legacy_score_path = "results_sdp/sweep_wdwe2_k20/score.jld2"
+legacy_score_sha256 = "10057f268d27b990ff52c109a3b0d93a76e87a480fd7cb2c74c9f9755e01b76b"
+schema_version = 1
+scores_path = "baselines/wdwe2_k20/scores.csv"
+scores_sha256 = "80234f6f5ac930b8481806e0eddec3495cd6e6901c25fd0030b189d49783852c"
+value_function_count = 70
+value_function_directory = "results_sdp/sweep_wdwe2_k20/value_functions"
+vf_manifest_path = "baselines/wdwe2_k20/vf-manifest.tsv"
+vf_manifest_sha256 = "52002857e58b13e5d6b22bf45ebb381da8b98553323d12fefc9ef0091727aed9"

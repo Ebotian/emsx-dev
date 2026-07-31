@@ -16,7 +16,15 @@ paper/*.xlsx
 # Julia compiled/manifest
 *.jl.cov
 *.jl.mem
-Manifest.toml
+/.julia-depot/
+/.worktrees/
+# Package-local manifests stay ignored; the application lockfile is tracked.
+**/Manifest.toml
+!/Manifest.toml
+
+# Local tool-routing helpers
+/api.json
+/toapi.py
 
 # OS files
 .DS_Store
