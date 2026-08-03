@@ -13,19 +13,21 @@
   const t = (k: string) => i18n.t(k);
 
   let selected = $state<ControllerId[]>(['S_AR', 'R_P', 'MPC', 'SDP']);
+  let ready = $state(false);
   let container: HTMLDivElement;
   let chart: echarts.ECharts | undefined;
-  let seriesCache = new Map<string, { cumCost: number[]; soc: number[]; daily: number[] }>();
+  const seriesCache = new Map<string, { cumCost: number[]; soc: number[]; daily: number[] }>();
 
-  onMount(async () => {
+  onMount(() => {
     chart = echarts.init(container);
     const ro = new ResizeObserver(() => chart?.resize());
     ro.observe(container);
+    ready = true;
     return () => ro.disconnect();
   });
 
   $effect(async () => {
-    if (!chart) return;
+    if (!ready) return;
     const rows: { name: string; cum: number[]; soc: number[]; color: string }[] = [];
     for (const cid of selected) {
       let s = seriesCache.get(cid);

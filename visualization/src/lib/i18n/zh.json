@@ -23,7 +23,8 @@
     "cost": "成本",
     "savings": "节省 vs Dummy",
     "convention": "口径",
-    "conventionNote": "统一连续 SOC 口径；论文原版分数为重置 SOC 口径，仅参考"
+    "conventionNote": "统一连续 SOC 口径；论文原版分数为重置 SOC 口径，仅参考",
+    "horizonTime": "预测时间"
   },
   "results": {
     "title": "终点对比",
@@ -39,8 +40,12 @@
     "soc": "SOC 轨迹"
   },
   "forecast": {
-    "title": "预测准确性 / 置信度",
-    "note": "70 站点训练期，随 forecast horizon (15min..24h)",
-    "coverage": "名义 vs 经验覆盖率校准"
+    "title": "预测准确性（15min → 24h）",
+    "note": "RMSE/MAE/bias/R² 随预测时间变化；70 站点训练期",
+    "confidence": "预测区间宽度（不确定性随 horizon 增长）",
+    "confidenceNote": "50/80/95% 残差分位数区间宽度——越远越不确定",
+    "coverage": "名义 vs 经验覆盖率校准",
+    "siteRmse": "逐站点 24h 预测 RMSE（对标论文 Figure 3）",
+    "siteRmseNote": "70 站点按 24h 净需求预测 RMSE 升序；15min-ahead 为参照"
   }
 }

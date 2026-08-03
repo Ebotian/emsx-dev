@@ -23,7 +23,8 @@
     "cost": "Cost",
     "savings": "Savings vs Dummy",
     "convention": "Convention",
-    "conventionNote": "Unified continuous-SOC convention; paper reset-SOC scores are reference only"
+    "conventionNote": "Unified continuous-SOC convention; paper reset-SOC scores are reference only",
+    "horizonTime": "Forecast time"
   },
   "results": {
     "title": "Endpoint Comparison",
@@ -39,8 +40,12 @@
     "soc": "SOC trajectory"
   },
   "forecast": {
-    "title": "Forecast Accuracy / Confidence",
-    "note": "70 sites, training periods, vs forecast horizon (15min..24h)",
-    "coverage": "Nominal vs empirical coverage calibration"
+    "title": "Forecast Accuracy (15min → 24h)",
+    "note": "RMSE/MAE/bias/R² over the forecast time domain; 70 sites, training periods",
+    "confidence": "Forecast interval width (uncertainty grows with horizon)",
+    "confidenceNote": "Residual quantile interval widths (50/80/95%) — wider means less certain",
+    "coverage": "Nominal vs empirical coverage calibration",
+    "siteRmse": "Per-site 24h-ahead forecast RMSE (paper Figure 3 analogue)",
+    "siteRmseNote": "70 sites ranked by 24h-ahead net-demand forecast RMSE; 15min-ahead shown as reference"
   }
 }

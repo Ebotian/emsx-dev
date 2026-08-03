@@ -5,7 +5,7 @@ nominal 50/80/95% intervals (residual-quantile based)."""
 import gzip, csv, os, json
 import numpy as np
 
-ROOT = os.environ.get("EMSX_DATA_ROOT", "/home/ebt/Downloads/emsx/.worktrees/orthogonal80-research")
+ROOT = os.environ.get("EMSX_DATA_ROOT", os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 TRAIN = os.path.join(ROOT, "dataset", "train")
 OUT = os.path.join(os.path.dirname(__file__), "..", "..", "public", "data", "accuracy.json")
 
@@ -40,8 +40,12 @@ for k in range(1, H + 1):
     def cov(q):
         lo, hi = np.quantile(e, (1 - q) / 2), np.quantile(e, (1 + q) / 2)
         return float(np.mean((e >= lo) & (e <= hi)))
+    def width(q):
+        lo, hi = np.quantile(e, (1 - q) / 2), np.quantile(e, (1 + q) / 2)
+        return float(hi - lo)
     points.append({
         "horizon": k,
+        "minutes": k * 15,                      # 15-min steps -> elapsed forecast time
         "rmse": round(float(np.sqrt(se.mean())), 4),
         "mae": round(float(np.abs(e).mean()), 4),
         "bias": round(float(e.mean()), 4),
@@ -49,6 +53,10 @@ for k in range(1, H + 1):
         "cov50": round(cov(0.50), 4),
         "cov80": round(cov(0.80), 4),
         "cov95": round(cov(0.95), 4),
+        "width50": round(width(0.50), 4),       # interval widths: uncertainty grows with horizon
+        "width80": round(width(0.80), 4),
+        "width95": round(width(0.95), 4),
+        "n": int(len(e)),
     })
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)

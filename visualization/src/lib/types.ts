@@ -63,6 +63,8 @@ export interface ProcessSeries {
 
 export interface AccuracyPoint {
   horizon: number;
+  /** elapsed forecast time in minutes (horizon * 15) */
+  minutes: number;
   rmse: number;
   mae: number;
   bias: number;
@@ -71,4 +73,9 @@ export interface AccuracyPoint {
   cov50: number;
   cov80: number;
   cov95: number;
+  /** residual interval widths (uncertainty growth with horizon) */
+  width50: number;
+  width80: number;
+  width95: number;
+  n: number;
 }

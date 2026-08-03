@@ -13,6 +13,7 @@
   $effect(() => i18n.subscribe((l) => (lang = l)));
   const t = (k: string) => i18n.t(k);
   let selected = $state<ControllerId[]>(['S_AR', 'R_P', 'R_FE96', 'MPC', 'OLFC-10', 'SDP']);
+  let ready = $state(false);
   let container: HTMLDivElement;
   let chart: echarts.ECharts | undefined;
   let endpoints: Record<ControllerId, { score: number; cost: number; paperScore?: number }> | undefined;
@@ -22,11 +23,12 @@
     chart = echarts.init(container);
     const ro = new ResizeObserver(() => chart?.resize());
     ro.observe(container);
+    ready = true;
     return () => ro.disconnect();
   });
 
   $effect(() => {
-    if (!chart || !endpoints) return;
+    if (!ready || !endpoints) return;
     const rows = selected.map((id) => ({
       id,
       score: endpoints[id].score,

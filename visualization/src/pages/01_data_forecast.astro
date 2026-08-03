@@ -1,17 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AccuracyCurveChart from '../components/charts/AccuracyCurveChart.svelte';
+import ConfidenceWidthChart from '../components/charts/ConfidenceWidthChart.svelte';
 import CoverageChart from '../components/charts/CoverageChart.svelte';
+import SiteRMSEChart from '../components/charts/SiteRMSEChart.svelte';
 ---
 
 <BaseLayout title="Forecast Accuracy">
   <section class="card">
-    <h2 data-i18n="forecast.title">预测准确性 / 置信度（随 horizon）</h2>
-    <p class="convention-note" data-i18n="forecast.note">RMSE/MAE/bias/R² 与名义 50/80/95% 区间的经验覆盖率；数据为 70 站点训练期</p>
+    <h2 data-i18n="forecast.title">预测准确性（随预测时间 15min → 24h）</h2>
+    <p class="convention-note" data-i18n="forecast.note">RMSE/MAE/bias/R² 随预测时域变化；70 站点训练期</p>
     <AccuracyCurveChart client:load />
+  </section>
+  <section class="card">
+    <h2 data-i18n="forecast.confidence">预测区间宽度（不确定性随 horizon 增长）</h2>
+    <p class="convention-note" data-i18n="forecast.confidenceNote">50/80/95% 残差分位数区间宽度——越远越不确定</p>
+    <ConfidenceWidthChart client:load />
   </section>
   <section class="card">
     <h2 data-i18n="forecast.coverage">名义 vs 经验覆盖率校准</h2>
     <CoverageChart client:load />
+  </section>
+  <section class="card">
+    <h2 data-i18n="forecast.siteRmse">逐站点 24h 预测 RMSE（对标论文 Figure 3）</h2>
+    <p class="convention-note" data-i18n="forecast.siteRmseNote">70 站点按 24h-ahead 净需求预测 RMSE 升序；15min-ahead 为参照</p>
+    <SiteRMSEChart client:load />
   </section>
 </BaseLayout>

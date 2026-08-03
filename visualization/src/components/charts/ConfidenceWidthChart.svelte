@@ -1,15 +1,9 @@
 <script lang="ts">
-  /** F1: forecast accuracy vs elapsed forecast time (15min..24h): RMSE/MAE/bias left, R2 right. */
+  /** F2: residual interval widths (50/80/95%) vs elapsed forecast time — uncertainty grows with horizon. */
   import { onMount } from 'svelte';
   import * as echarts from 'echarts';
   import { data } from '../../lib/data';
   import { palette, axisStyle, font } from '../../lib/palette';
-  import { useI18n } from '../../lib/useI18n';
-
-  const i18n = useI18n();
-  let lang = $state(i18n.lang);
-  $effect(() => i18n.subscribe((l) => (lang = l)));
-  const t = (k: string) => i18n.t(k);
 
   const fmtTime = (min: number) =>
     min < 60 ? `${min}min` : min % 60 === 0 ? `${min / 60}h` : `${(min / 60).toFixed(1)}h`;
@@ -30,30 +24,26 @@
           if (!p) return '';
           const head = `<b>${fmtTime(p.minutes)}</b> (horizon ${p.horizon}, n=${p.n})`;
           const rows = arr
-            .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value).toFixed(q.seriesName === 'R²' ? 4 : 2)}`)
+            .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value).toFixed(1)} kWh`)
             .join('<br/>');
           return `${head}<br/>${rows}`;
         },
       },
       legend: { top: 0, textStyle: { fontFamily: font } },
-      grid: { left: 48, right: 48, top: 32, bottom: 44 },
+      grid: { left: 48, right: 16, top: 32, bottom: 44 },
       xAxis: {
         type: 'value',
-        name: t('common.horizonTime'),
+        name: 'forecast time',
         min: 0,
         max: 1440,
         axisLabel: { formatter: (v: number) => fmtTime(v), fontFamily: font },
         ...axisStyle,
       },
-      yAxis: [
-        { type: 'value', name: 'RMSE / MAE / bias', ...axisStyle },
-        { type: 'value', name: 'R²', min: 0, max: 1, ...axisStyle },
-      ],
+      yAxis: { type: 'value', name: 'interval width (kWh)', ...axisStyle },
       series: [
-        { name: 'RMSE', type: 'line', data: pts.map((p) => [p.minutes, p.rmse]), symbol: 'none', itemStyle: { color: palette.accent } },
-        { name: 'MAE', type: 'line', data: pts.map((p) => [p.minutes, p.mae]), symbol: 'none', itemStyle: { color: palette.paperLookahead[0] } },
-        { name: 'bias', type: 'line', data: pts.map((p) => [p.minutes, p.bias]), symbol: 'none', itemStyle: { color: palette.faint } },
-        { name: 'R²', type: 'line', yAxisIndex: 1, data: pts.map((p) => [p.minutes, p.r2]), symbol: 'none', itemStyle: { color: palette.danger } },
+        { name: '50% interval', type: 'line', data: pts.map((p) => [p.minutes, p.width50]), symbol: 'none', itemStyle: { color: palette.paperLookahead[0] } },
+        { name: '80% interval', type: 'line', data: pts.map((p) => [p.minutes, p.width80]), symbol: 'none', itemStyle: { color: palette.accent } },
+        { name: '95% interval', type: 'line', data: pts.map((p) => [p.minutes, p.width95]), symbol: 'none', itemStyle: { color: palette.danger } },
       ],
     };
     chart.setOption(opt);
@@ -63,4 +53,4 @@
   });
 </script>
 
-<div bind:this={container} style="width:100%;height:400px;"></div>
+<div bind:this={container} style="width:100%;height:360px;"></div>
