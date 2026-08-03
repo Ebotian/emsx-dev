@@ -1,43 +1,52 @@
-# Astro Starter Kit: Minimal
+# EMSx Audit — Interactive Visualization
+
+A static, interactive site presenting the EMSx benchmark audit and the
+online-rollout results from the parent repository. Every chart corresponds
+to a closed claim of the audit report (`../typst_conclusion/`); negative
+results are shown as prominently as positive ones.
+
+## Pages
+
+| Route | Content |
+|---|---|
+| `index` | overview + research journey (score evolution with exploit/audit labels) |
+| `01_data_forecast` | dataset structure, day-ahead forecast accuracy over horizons |
+| `02_dispatch` | dispatch curves with controller switching, energy-balance annotation |
+| `03_exploit` | energy-conservation violation audit (empty-battery discharge) |
+| `04_timing` | decision timestamp and information structure timeline |
+| `05_results` | dual-track leaderboard (official EMSx vs physical LP track) |
+| `06_per_site` | per-site cost scatter, 70 sites |
+| `07_process` | per-controller process trajectories (controller-parallel) |
+| `08_sensitivity` | persistence/AR prediction-quality sensitivity |
+
+Benchmark-track and physical-track results are kept in separate labeled
+views; controller selectors run through pages 02/05/06/07.
+
+## Stack
+
+- **Astro 5** (static output) + **Svelte 5** (chart/interaction components)
+  + **TypeScript** + **Vite** + **pnpm** + **ECharts**
+- Helvetica-style minimal design tokens (near-black text, single accent
+  color, controller-family palette: paper lookahead blue-grey / our
+  physical controllers deep blue / exploit red), tabular numerals
+- i18n dictionaries (en/zh) with runtime switching
+
+## Data pipeline
+
+`scripts/precompute/` (Python + Julia) converts raw results into
+`public/data/*.json` — 8 controllers (Dummy / MPC / OLFC / SDP /
+SDP-AR(1) / `S_AR` / `R_P` / `R_FE96`) × 3 levels (endpoints / per-site /
+process), on a unified continuous-SOC convention.
+
+## Run
 
 ```sh
-pnpm create astro@latest -- --template minimal
+pnpm install
+pnpm dev       # dev server at http://localhost:4321
+pnpm build     # static output to dist/
+pnpm preview   # serve the built site
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## License
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Apache-2.0 (same as the parent repository).
