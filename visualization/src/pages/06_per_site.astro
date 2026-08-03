@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PerSiteScatter from '../components/charts/PerSiteScatter.svelte';
+---
+
+<BaseLayout title="Per-Site">
+  <section class="card">
+    <h2 data-i18n="perSite.title">逐站点差异</h2>
+    <p class="convention-note">蓝点 = R_P 在该站点优于 S_AR（11/70）；灰点 = S_AR 更优</p>
+    <PerSiteScatter client:load />
+  </section>
+</BaseLayout>

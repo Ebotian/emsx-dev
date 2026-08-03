@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProcessChart from '../components/charts/ProcessChart.svelte';
+---
+
+<BaseLayout title="Process">
+  <section class="card">
+    <h2 data-i18n="process.title">过程差异（site 1，第一周）</h2>
+    <p class="convention-note">实线 = 累计成本，虚线 = SOC；同站点同周，控制器平行对比</p>
+    <ProcessChart client:load />
+  </section>
+</BaseLayout>
