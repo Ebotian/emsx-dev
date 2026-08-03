@@ -46,6 +46,8 @@
     "confidenceNote": "Residual quantile interval widths (50/80/95%) — wider means less certain",
     "coverage": "Nominal vs empirical coverage calibration",
     "siteRmse": "Per-site 24h-ahead forecast RMSE (paper Figure 3 analogue)",
-    "siteRmseNote": "70 sites ranked by 24h-ahead net-demand forecast RMSE; 15min-ahead shown as reference"
+    "siteRmseNote": "70 sites ranked by 24h-ahead net-demand forecast RMSE; 15min-ahead shown as reference",
+    "confidenceFamily": "Per-site forecast confidence curve family (R², %)",
+    "confidenceFamilyNote": "One curve per site: median 91.1% at 15min → 70.3% at 24h; P5–P95 envelope"
   }
 }

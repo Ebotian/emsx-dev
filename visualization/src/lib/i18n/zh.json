@@ -46,6 +46,8 @@
     "confidenceNote": "50/80/95% 残差分位数区间宽度——越远越不确定",
     "coverage": "名义 vs 经验覆盖率校准",
     "siteRmse": "逐站点 24h 预测 RMSE（对标论文 Figure 3）",
-    "siteRmseNote": "70 站点按 24h 净需求预测 RMSE 升序；15min-ahead 为参照"
+    "siteRmseNote": "70 站点按 24h 净需求预测 RMSE 升序；15min-ahead 为参照",
+    "confidenceFamily": "逐站点预测置信度曲线族（R²，%）",
+    "confidenceFamilyNote": "70 站点各一条曲线：15min 中位 91.1% → 24h 中位 70.3%；P5–P95 包络"
   }
 }
