@@ -34,7 +34,7 @@
     "title": "逐站点差异",
     "deltaHeat": "两两控制器逐站点成本差",
     "gain": "逐站点最终结果对比（对标论文 gain_by_rmse / gain_by_gap）",
-    "gainNote": "70 站点按 24h 预测 RMSE 或站点号排序；虚线 = 物理 LP 上界，点线 = dummy 零 gain；控制器可勾选"
+    "gainNote": "Gain = dummy 成本 − 控制器成本（节省额，论文口径）。虚线 = 完美预测上界（物理 LP oracle，逐站点）；点线 = dummy 零 gain；控制器为离散散点（无线条）。按 24h RMSE 或站点号排序"
   },
   "process": {
     "title": "过程差异",

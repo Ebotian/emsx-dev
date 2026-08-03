@@ -34,7 +34,7 @@
     "title": "Per-Site Differences",
     "deltaHeat": "Pairwise per-site cost difference",
     "gain": "Per-site final-result gains (paper gain_by_rmse / gain_by_gap)",
-    "gainNote": "70 sites ranked by 24h forecast RMSE or site id; dashed = physical LP upper bound, dotted = dummy zero gain; controllers selectable"
+    "gainNote": "Gain = dummy cost − controller cost (saving, paper convention). Dashed = perfect-prediction upper bound (physical LP oracle, per-site); dotted = dummy zero; controllers are discrete points (no lines). Rank by 24h RMSE or site id."
   },
   "process": {
     "title": "Process Differences",

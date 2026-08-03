@@ -1,13 +1,15 @@
 <script lang="ts">
   /** Per-site final-result gains — paper gain_by_rmse / gain_by_gap analogue.
-   *  Sites ranked by 24h-ahead forecast RMSE (or by site id); controllers selectable;
-   *  LP physical upper bound shown dashed, dummy zero gain as reference line. */
+   *  Gain = dummy_cost - controller_cost (absolute saving, paper convention).
+   *  Perfect-prediction upper bound = dummy - LP oracle cost (dashed, per-site).
+   *  Controllers drawn as scatter symbols (sites are discrete — no connecting lines);
+   *  rank by 24h forecast RMSE or site id. */
   import { onMount } from 'svelte';
   import * as echarts from 'echarts';
   import { palette, axisStyle, seriesFor, font } from '../../lib/palette';
   import type { ControllerId } from '../../lib/types';
 
-  type Row = { site: number; rmse96: number; dummy_cost: number; scores: Record<string, number>; lp_score?: number };
+  type Row = { site: number; rmse96: number; dummy_cost: number; gains: Record<string, number>; lp_gain?: number };
   const DEFAULT_CTRL: ControllerId[] = ['S_AR', 'R_P', 'R_FE96', 'MPC', 'SDP', 'SDP-AR(1)'];
   const ALL_CTRL: ControllerId[] = ['Dummy', 'MPC', 'OLFC-10', 'SDP', 'SDP-AR(1)', 'S_AR', 'R_P', 'R_FE96'];
 
@@ -42,16 +44,16 @@
       const p = Array.isArray(params) ? params[0] : params;
       const r = order[p.dataIndex];
       if (!r) return '';
-      const head = `<b>site ${r.site}</b> (24h RMSE ${r.rmse96.toFixed(1)})<br/>`;
+      const head = `<b>site ${r.site}</b> (24h RMSE ${r.rmse96.toFixed(1)}, dummy ${r.dummy_cost.toFixed(0)})<br/>`;
       const rows_ = (Array.isArray(params) ? params : [params])
-        .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value[1]).toFixed(3)}`)
+        .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value[1]).toFixed(1)}`)
         .join('<br/>');
       return head + rows_;
     };
     const opt: echarts.EChartsOption = {
       tooltip: { trigger: 'axis', formatter: tt },
       legend: { top: 0, type: 'scroll', textStyle: { fontFamily: font } },
-      grid: { left: 48, right: 24, top: 36, bottom: 48 },
+      grid: { left: 56, right: 24, top: 36, bottom: 48 },
       xAxis: {
         type: 'category',
         data: xs,
@@ -59,23 +61,23 @@
         name: sortBy === 'rmse' ? 'sites ranked by 24h forecast RMSE →' : 'site id →',
         ...axisStyle,
       },
-      yAxis: { type: 'value', name: 'gain G_i (score)', ...axisStyle },
+      yAxis: { type: 'value', name: 'gain = dummy − cost', ...axisStyle },
       series: [
-        ...(rows[0]?.lp_score !== undefined ? [{
-          name: 'LP upper bound',
+        ...(rows[0]?.lp_gain !== undefined ? [{
+          name: 'perfect-prediction upper bound (LP)',
           type: 'line',
-          data: order.map((r) => [r.site, r.lp_score]),
+          data: order.map((r) => [r.site, r.lp_gain]),
           symbol: 'none',
           lineStyle: { type: 'dashed', width: 1.5, color: palette.danger },
         }] : []),
         { name: 'dummy (zero gain)', type: 'line', data: order.map((r) => [r.site, 0]), symbol: 'none', lineStyle: { type: 'dotted', color: palette.faint } },
         ...selected.map((c) => ({
           name: c,
-          type: 'line',
-          data: order.map((r) => [r.site, r.scores[c] ?? 0]),
-          symbol: 'none',
+          type: 'scatter',
+          data: order.map((r) => [r.site, r.gains[c] ?? 0]),
+          symbolSize: 5,
           itemStyle: { color: seriesFor[c] },
-          lineStyle: { width: c === 'S_AR' ? 2.5 : 1.5 },
+          emphasis: { focus: 'series' },
         })),
       ],
     };

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Per-site final-result gains — merges per_site scores, per-site RMSE, and the
-physical LP oracle upper bound. Mirrors the paper figures gain_by_rmse / gain_by_gap:
-  - gain_by_rmse: controllers' per-site score, sites ranked by forecast RMSE ascending
-  - gain_by_gap:   per-site score vs the LP upper bound (dashed) and dummy zero line
-Score convention: G_i = (C_dummy_i - C_i) / C_dummy_i (continuous-SOC physical track).
-LP upper bound score: (C_dummy - C_lp) / C_dummy."""
+"""Per-site final-result gains — mirrors the paper figures gain_by_rmse / gain_by_gap.
+Gain convention (paper eq. for the gain): G_i(phi) = dummy_cost_i - cost_i(phi)
+(absolute saving over the no-battery dummy). The perfect-prediction upper bound is
+G_bar_i = dummy_cost_i - lp_cost_i where lp_cost_i is the physical LP oracle cost
+(per-site, may be negative on net-exporting sites). Sites can be ranked by the 24h
+forecast RMSE (gain_by_rmse) or by site id (gain_by_gap)."""
 import os, json
 
 PUB = os.path.join(os.path.dirname(__file__), "..", "..", "public", "data")
@@ -14,9 +14,7 @@ site_rmse = {r["site"]: r for r in json.load(open(os.path.join(PUB, "site_rmse.j
 
 CTRLS = ["Dummy", "MPC", "OLFC-10", "SDP", "SDP-AR(1)", "S_AR", "R_P", "R_FE96"]
 
-# LP oracle: physical score is (dummy - cost) / (dummy - lp_cost), i.e. normalized
-# against the LP perfect-prediction cost — so the LP upper bound is score 1.0 by
-# construction (see .worktrees/.../scripts/score_physical_run.jl).
+# physical LP oracle cost per site (official scoring convention)
 lp_cost = {}
 if os.path.exists("/tmp/physical_lp_oracle.csv"):
     import csv
@@ -27,16 +25,18 @@ if os.path.exists("/tmp/physical_lp_oracle.csv"):
 rows = []
 for site in sorted(map(int, per_site["S_AR"].keys())):
     dummy = per_site["Dummy"][str(site)]["cost"]
+    gains = {c: round(dummy - per_site[c][str(site)]["cost"], 4) for c in CTRLS}
     entry = {
         "site": site,
         "rmse96": site_rmse[site]["rmse96"],
         "dummy_cost": round(dummy, 2),
-        "scores": {c: round(per_site[c][str(site)]["score"], 4) for c in CTRLS},
+        "gains": gains,                       # saving vs dummy per controller
     }
     if site in lp_cost:
-        entry["lp_score"] = 1.0  # LP perfect-prediction = upper bound by convention
+        entry["lp_gain"] = round(dummy - lp_cost[site], 4)  # perfect-prediction upper bound gain
     rows.append(entry)
 
 with open(os.path.join(PUB, "site_gain.json"), "w") as f:
     json.dump(rows, f, indent=1)
-print(f"site_gain: {len(rows)} sites -> site_gain.json (lp rows: {sum(1 for r in rows if 'lp_score' in r)})")
+lp_n = sum(1 for r in rows if "lp_gain" in r)
+print(f"site_gain: {len(rows)} sites -> site_gain.json (lp_gain rows: {lp_n})")
