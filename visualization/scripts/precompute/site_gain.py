@@ -14,7 +14,9 @@ site_rmse = {r["site"]: r for r in json.load(open(os.path.join(PUB, "site_rmse.j
 
 CTRLS = ["Dummy", "MPC", "OLFC-10", "SDP", "SDP-AR(1)", "S_AR", "R_P", "R_FE96"]
 
-# LP oracle upper bound (cost) -> score
+# LP oracle: physical score is (dummy - cost) / (dummy - lp_cost), i.e. normalized
+# against the LP perfect-prediction cost — so the LP upper bound is score 1.0 by
+# construction (see .worktrees/.../scripts/score_physical_run.jl).
 lp_cost = {}
 if os.path.exists("/tmp/physical_lp_oracle.csv"):
     import csv
@@ -32,7 +34,7 @@ for site in sorted(map(int, per_site["S_AR"].keys())):
         "scores": {c: round(per_site[c][str(site)]["score"], 4) for c in CTRLS},
     }
     if site in lp_cost:
-        entry["lp_score"] = round((dummy - lp_cost[site]) / dummy, 4)
+        entry["lp_score"] = 1.0  # LP perfect-prediction = upper bound by convention
     rows.append(entry)
 
 with open(os.path.join(PUB, "site_gain.json"), "w") as f:
