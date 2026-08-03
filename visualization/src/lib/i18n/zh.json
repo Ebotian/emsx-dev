@@ -31,10 +31,11 @@
     "officialNote": "论文分数（重置 SOC 口径）仅作外部参考，不与统一口径混排"
   },
   "perSite": {
-    "title": "逐站点差异",
+    "title": "逐站点成本差异（R_P vs S_AR）",
     "deltaHeat": "两两控制器逐站点成本差",
     "gain": "逐站点最终结果对比（对标论文 gain_by_rmse / gain_by_gap）",
-    "gainNote": "Gain = dummy 成本 − 控制器成本（节省额，论文口径）。虚线 = 完美预测上界（物理 LP oracle，逐站点）；点线 = dummy 零 gain；控制器为离散散点（无线条）。按 24h RMSE 或站点号排序"
+    "gainNote": "Gain = dummy 成本 − 控制器成本（节省额，论文口径）。虚线 = 完美预测上界（物理 LP oracle，逐站点）；点线 = dummy 零 gain；控制器为离散散点（无线条）。按 24h RMSE 或站点号排序",
+    "note": "Δ = R_P 成本 − S_AR 成本；蓝 = R_P 更省，灰 = S_AR 更省。平均原始成本仅差 ~0.3%，差值图才有分辨度"
   },
   "process": {
     "title": "过程差异",

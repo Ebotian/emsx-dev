@@ -31,10 +31,11 @@
     "officialNote": "Paper scores (reset-SOC convention) are external reference; never mixed into the unified leaderboard"
   },
   "perSite": {
-    "title": "Per-Site Differences",
+    "title": "Per-site cost difference (R_P vs S_AR)",
     "deltaHeat": "Pairwise per-site cost difference",
     "gain": "Per-site final-result gains (paper gain_by_rmse / gain_by_gap)",
-    "gainNote": "Gain = dummy cost − controller cost (saving, paper convention). Dashed = perfect-prediction upper bound (physical LP oracle, per-site); dotted = dummy zero; controllers are discrete points (no lines). Rank by 24h RMSE or site id."
+    "gainNote": "Gain = dummy cost − controller cost (saving, paper convention). Dashed = perfect-prediction upper bound (physical LP oracle, per-site); dotted = dummy zero; controllers are discrete points (no lines). Rank by 24h RMSE or site id.",
+    "note": "Δ = R_P cost − S_AR cost per site; blue = R_P cheaper, grey = S_AR cheaper. Raw costs differ by ~0.3% on average, so the difference (not the scatter) carries the signal."
   },
   "process": {
     "title": "Process Differences",
