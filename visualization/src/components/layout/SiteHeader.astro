@@ -23,7 +23,7 @@ const current = Astro.url.pathname;
   <span class="brand">EMSx</span>
   <nav class="site-nav">
     {pages.map((p) => (
-      <a href={p.href} aria-current={current === p.href || (p.href !== '/' && current.startsWith(p.href)) ? 'page' : undefined}>
+      <a href={p.href} data-i18n-key={p.key} aria-current={current === p.href || (p.href !== '/' && current.startsWith(p.href)) ? 'page' : undefined}>
         {t(`nav.${p.key}`)}
       </a>
     ))}

@@ -57,5 +57,23 @@
     "fe96": "R_FE96 — forecast-error rollout, physical",
     "rp": "R_P — persistence rollout, causal",
     "sar": "S_AR — SDP-AR(1) baseline"
+  },
+  "dispatch": {
+    "title": "Energy-balance dispatch (site 1, first 4 weeks, periods 1/8/9/11)",
+    "note": "top: load / PV / net demand; middle: SOC; bottom: control u. Hover for energy breakdown: import = z + u·P·Δt; wheel/slider to zoom",
+    "equation": "Energy-balance relations"
+  },
+  "exploit": {
+    "title": "Energy-conservation violation — exploit metrics (log scale, 3 controllers)",
+    "note": "r_infeasible / E_phantom / r_{0,-1}: candidate and oracle at parity, baseline 4–5 orders lower — 0.9973 is exploit parity"
+  },
+  "timing": {
+    "title": "Decision time & information structure (step 1, site 1)",
+    "note": "t_decision = timestamp of row t+96 (proved by code, paper, data)"
+  },
+  "sensitivity": {
+    "denominator": "Score denominator distribution (D = C^d − C^a)",
+    "denominatorNote": "min 2.4 · P10 87 · median 295 — 8 sites with D<100, score sensitive to tiny cost changes",
+    "persistence": "Persistence attribution test (negative evidence)"
   }
 }

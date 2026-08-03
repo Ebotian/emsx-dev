@@ -10,14 +10,24 @@
   let lang = $state(i18n.lang);
   $effect(() => i18n.subscribe((l) => (lang = l)));
   const t = (k: string) => i18n.t(k);
+
+  let ready = $state(false);
+  let journey = $state<{ step: string; score: number; labelKey: string }[]>([]);
   let container: HTMLDivElement;
   let chart: echarts.ECharts | undefined;
+  const labels = $derived(journey.map((s) => (lang, t(s.labelKey))));
 
   onMount(async () => {
+    journey = await data.journey();
     chart = echarts.init(container);
-    const journey = await data.journey();
-    const stages = journey.map((s) => s.labelKey);
-    const labels = stages.map((k) => t(k));
+    const ro = new ResizeObserver(() => chart?.resize());
+    ro.observe(container);
+    ready = true;
+    return () => ro.disconnect();
+  });
+
+  $effect(() => {
+    if (!ready || journey.length === 0) return;
     const option: echarts.EChartsOption = {
       tooltip: { trigger: 'axis' },
       grid: { left: 48, right: 16, top: 24, bottom: 40 },
@@ -33,10 +43,7 @@
         },
       ],
     };
-    chart.setOption(option);
-    const ro = new ResizeObserver(() => chart?.resize());
-    ro.observe(container);
-    return () => ro.disconnect();
+    chart?.setOption(option, { notMerge: true });
   });
 </script>
 

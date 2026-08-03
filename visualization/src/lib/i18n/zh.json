@@ -57,5 +57,23 @@
     "fe96": "R_FE96 — 预测误差 rollout，物理口径",
     "rp": "R_P — 持续性 rollout，因果",
     "sar": "S_AR — SDP-AR(1) 基线"
+  },
+  "dispatch": {
+    "title": "能量平衡 dispatch（site 1，前 4 周，period 1/8/9/11）",
+    "note": "上：负荷/PV/净需求；中：SOC；下：控制 u。悬停显示能量分解：import = z + u·P·Δt；滚轮/滑块缩放",
+    "equation": "能量平衡关系"
+  },
+  "exploit": {
+    "title": "环境能量守恒漏洞 — exploit 指标（三控制器对数刻度）",
+    "note": "r_infeasible / E_phantom / r_{0,-1}：candidate 与 oracle 同量级，baseline 低 4–5 个数量级 —— 0.9973 是 exploit parity"
+  },
+  "timing": {
+    "title": "决策时刻与信息结构（step 1, site 1）",
+    "note": "t_decision = 行 t+96 的时间戳（代码+论文+数据证明）"
+  },
+  "sensitivity": {
+    "denominator": "Score 分母分布（D = C^d − C^a）",
+    "denominatorNote": "min 2.4 · P10 87 · median 295 —— 8 个站点 D<100，score 对微小成本变化敏感",
+    "persistence": "Persistence 归因检验（负证据）"
   }
 }

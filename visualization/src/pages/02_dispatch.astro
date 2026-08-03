@@ -5,12 +5,12 @@ import DispatchChart from '../components/charts/DispatchChart.svelte';
 
 <BaseLayout title="Dispatch">
   <section class="card">
-    <h2>能量平衡 dispatch（site 1，前 4 周，period 1/8/9/11）</h2>
-    <p class="convention-note">上：负荷/PV/净需求；中：SOC；下：控制 u。悬停显示能量分解：import = z + u·P·Δt；滚轮/滑块缩放</p>
+    <h2 data-i18n="dispatch.title">能量平衡 dispatch（site 1，前 4 周，period 1/8/9/11）</h2>
+    <p class="convention-note" data-i18n="dispatch.note">上：负荷/PV/净需求；中：SOC；下：控制 u。悬停显示能量分解：import = z + u·P·Δt；滚轮/滑块缩放</p>
     <DispatchChart client:load />
   </section>
   <section class="card">
-    <h2>能量平衡关系</h2>
+    <h2 data-i18n="dispatch.equation">能量平衡关系</h2>
     <p style="font-size:13px;color:#1a1a1a;">
       SOC<sub>t+1</sub> = SOC<sub>t</sub> + (η<sub>c</sub>·u⁺ − u⁻/η<sub>d</sub>)·P·Δt/C
       &nbsp;·&nbsp; import = z + u·P·Δt

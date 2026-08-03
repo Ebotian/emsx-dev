@@ -11,11 +11,18 @@ export type Dict = typeof zh;
 
 const dicts: Record<Lang, Dict> = { zh, en };
 
-let lang: Lang = 'zh';
+function readSaved(): Lang {
+  if (typeof window === 'undefined') return 'zh';
+  const saved = window.localStorage.getItem('emsx-lang');
+  return saved === 'en' || saved === 'zh' ? saved : 'zh';
+}
+
+let lang: Lang = readSaved();
 const listeners = new Set<(l: Lang) => void>();
 
 export function setLang(l: Lang): void {
   lang = l;
+  if (typeof window !== 'undefined') window.localStorage.setItem('emsx-lang', l);
   for (const fn of listeners) fn(l);
 }
 export function getLang(): Lang {
