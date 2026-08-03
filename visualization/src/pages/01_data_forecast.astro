@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AccuracyCurveChart from '../components/charts/AccuracyCurveChart.svelte';
+import CoverageChart from '../components/charts/CoverageChart.svelte';
+---
+
+<BaseLayout title="Forecast Accuracy">
+  <section class="card">
+    <h2 data-i18n="forecast.title">预测准确性 / 置信度（随 horizon）</h2>
+    <p class="convention-note" data-i18n="forecast.note">RMSE/MAE/bias/R² 与名义 50/80/95% 区间的经验覆盖率；数据为 70 站点训练期</p>
+    <AccuracyCurveChart client:load />
+  </section>
+  <section class="card">
+    <h2 data-i18n="forecast.coverage">名义 vs 经验覆盖率校准</h2>
+    <CoverageChart client:load />
+  </section>
+</BaseLayout>

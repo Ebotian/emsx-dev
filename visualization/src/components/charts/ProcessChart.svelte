@@ -12,7 +12,7 @@
   $effect(() => i18n.subscribe((l) => (lang = l)));
   const t = (k: string) => i18n.t(k);
 
-  let selected = $state<ControllerId[]>(['S_AR', 'R_P', 'R_FE96']);
+  let selected = $state<ControllerId[]>(['S_AR', 'R_P', 'MPC', 'SDP']);
   let container: HTMLDivElement;
   let chart: echarts.ECharts | undefined;
   let seriesCache = new Map<string, { cumCost: number[]; soc: number[]; daily: number[] }>();
@@ -55,7 +55,7 @@
 </script>
 
 <fieldset style="border:none;padding:0;margin:0 0 8px;display:flex;gap:10px;flex-wrap:wrap;">
-  {#each (['S_AR', 'R_P', 'R_FE96'] as const) as cid}
+  {#each (['S_AR', 'R_P', 'R_FE96', 'MPC', 'SDP', 'Dummy', 'SDP-AR(1)'] as const) as cid}
     <label style="display:inline-flex;gap:4px;align-items:center;">
       <input type="checkbox" checked={selected.includes(cid)} onchange={() => (selected = selected.includes(cid) ? selected.filter((x) => x !== cid) : [...selected, cid])} />
       <span style="color:{seriesFor[cid]}">{cid}</span>
