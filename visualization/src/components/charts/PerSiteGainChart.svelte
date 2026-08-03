@@ -36,13 +36,14 @@
 
   $effect(() => {
     if (!ready) return;
-    const order = sortBy === 'rmse'
+    const byRmse = sortBy === 'rmse';
+    const order = byRmse
       ? [...rows].sort((a, b) => a.rmse96 - b.rmse96)
       : [...rows].sort((a, b) => a.site - b.site);
     const xs = order.map((r) => `#${r.site}`);
     const tt = (params: any) => {
       const p = Array.isArray(params) ? params[0] : params;
-      const r = order[p.dataIndex];
+      const r = byRmse ? order[p.dataIndex] : order[p.dataIndex];
       if (!r) return '';
       const head = `<b>site ${r.site}</b> (24h RMSE ${r.rmse96.toFixed(1)}, dummy ${r.dummy_cost.toFixed(0)})<br/>`;
       const rows_ = (Array.isArray(params) ? params : [params])
@@ -50,31 +51,34 @@
         .join('<br/>');
       return head + rows_;
     };
+    const xy = (r: Row, v: number) => (byRmse ? [r.rmse96, v] : [r.site, v]);
     const opt: echarts.EChartsOption = {
       tooltip: { trigger: 'axis', formatter: tt },
       legend: { top: 0, type: 'scroll', textStyle: { fontFamily: font } },
       grid: { left: 56, right: 24, top: 36, bottom: 48 },
-      xAxis: {
-        type: 'category',
-        data: xs,
-        axisLabel: { show: false },
-        name: sortBy === 'rmse' ? 'sites ranked by 24h forecast RMSE →' : 'site id →',
-        ...axisStyle,
-      },
+      xAxis: byRmse
+        ? { type: 'value', name: '24h forecast RMSE (kWh)', min: 0, ...axisStyle }
+        : {
+            type: 'category',
+            data: xs,
+            axisLabel: { show: false },
+            name: 'site id →',
+            ...axisStyle,
+          },
       yAxis: { type: 'value', name: 'gain = dummy − cost', ...axisStyle },
       series: [
         ...(rows[0]?.lp_gain !== undefined ? [{
           name: 'perfect-prediction upper bound (LP)',
           type: 'line',
-          data: order.map((r) => [r.site, r.lp_gain]),
+          data: order.map((r) => xy(r, r.lp_gain!)),
           symbol: 'none',
           lineStyle: { type: 'dashed', width: 1.5, color: palette.danger },
         }] : []),
-        { name: 'dummy (zero gain)', type: 'line', data: order.map((r) => [r.site, 0]), symbol: 'none', lineStyle: { type: 'dotted', color: palette.faint } },
+        { name: 'dummy (zero gain)', type: 'line', data: order.map((r) => xy(r, 0)), symbol: 'none', lineStyle: { type: 'dotted', color: palette.faint } },
         ...selected.map((c) => ({
           name: c,
           type: 'scatter',
-          data: order.map((r) => [r.site, r.gains[c] ?? 0]),
+          data: order.map((r) => xy(r, r.gains[c] ?? 0)),
           symbolSize: 5,
           itemStyle: { color: seriesFor[c] },
           emphasis: { focus: 'series' },
