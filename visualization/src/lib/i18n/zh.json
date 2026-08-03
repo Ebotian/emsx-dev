@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "index": "总览",
+    "forecast": "预测准确性",
+    "dispatch": "能量平衡",
+    "exploit": "环境漏洞",
+    "timing": "时间语义",
+    "results": "结果对比",
+    "perSite": "逐站点",
+    "process": "过程",
+    "sensitivity": "敏感性"
+  },
+  "index": {
+    "title": "EMSx 微电网电池控制 — 审计与在线控制研究",
+    "subtitle": "连续 SOC 口径 · 物理 LP oracle · 与论文标准控制器对比",
+    "journeyTitle": "研究演进（分数阶梯，连续 SOC 口径）"
+  },
+  "common": {
+    "controller": "控制器",
+    "site": "站点",
+    "horizon": "预测步数 (15min/步)",
+    "score": "Score",
+    "cost": "成本",
+    "savings": "节省 vs Dummy",
+    "convention": "口径",
+    "conventionNote": "统一连续 SOC 口径；论文原版分数为重置 SOC 口径，仅参考"
+  },
+  "results": {
+    "title": "终点对比",
+    "officialNote": "论文分数（重置 SOC 口径）仅作外部参考，不与统一口径混排"
+  },
+  "perSite": {
+    "title": "逐站点差异",
+    "deltaHeat": "两两控制器逐站点成本差"
+  },
+  "process": {
+    "title": "过程差异",
+    "cumCost": "累计成本（同一代表周）",
+    "soc": "SOC 轨迹"
+  }
+}

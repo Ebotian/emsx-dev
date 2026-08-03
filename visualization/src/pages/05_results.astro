@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LeaderboardChart from '../components/charts/LeaderboardChart.svelte';
+---
+
+<BaseLayout title="Results">
+  <section class="card">
+    <h2 data-i18n="results.title">终点对比（统一连续 SOC 口径）</h2>
+    <LeaderboardChart client:load />
+  </section>
+</BaseLayout>

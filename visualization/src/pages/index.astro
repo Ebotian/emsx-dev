@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import JourneyChart from '../components/charts/JourneyChart.svelte';
+---
+
+<BaseLayout title="EMSx">
+  <section class="card">
+    <h2 data-i18n="index.title">EMSx 微电网电池控制 — 审计与在线控制研究</h2>
+    <p class="note" data-i18n="index.subtitle">连续 SOC 口径 · 物理 LP oracle · 与论文标准控制器对比</p>
+    <p class="convention-note" data-i18n="common.conventionNote">统一连续 SOC 口径；论文原版分数为重置 SOC 口径，仅参考</p>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="index.journeyTitle">研究演进（分数阶梯，连续 SOC 口径）</h2>
+    <JourneyChart client:load />
+  </section>
+</BaseLayout>

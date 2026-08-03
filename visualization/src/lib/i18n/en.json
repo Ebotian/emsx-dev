@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "index": "Overview",
+    "forecast": "Forecast Accuracy",
+    "dispatch": "Energy Balance",
+    "exploit": "Environment Exploit",
+    "timing": "Time Semantics",
+    "results": "Results",
+    "perSite": "Per-Site",
+    "process": "Process",
+    "sensitivity": "Sensitivity"
+  },
+  "index": {
+    "title": "EMSx Microgrid Battery Control — Audit & Online Control Study",
+    "subtitle": "Continuous-SOC convention · physical LP oracle · vs paper standard controllers",
+    "journeyTitle": "Research journey (score ladder, continuous-SOC convention)"
+  },
+  "common": {
+    "controller": "Controller",
+    "site": "Site",
+    "horizon": "Forecast horizon (15-min steps)",
+    "score": "Score",
+    "cost": "Cost",
+    "savings": "Savings vs Dummy",
+    "convention": "Convention",
+    "conventionNote": "Unified continuous-SOC convention; paper reset-SOC scores are reference only"
+  },
+  "results": {
+    "title": "Endpoint Comparison",
+    "officialNote": "Paper scores (reset-SOC convention) are external reference; never mixed into the unified leaderboard"
+  },
+  "perSite": {
+    "title": "Per-Site Differences",
+    "deltaHeat": "Pairwise per-site cost difference"
+  },
+  "process": {
+    "title": "Process Differences",
+    "cumCost": "Cumulative cost (same representative week)",
+    "soc": "SOC trajectory"
+  }
+}
