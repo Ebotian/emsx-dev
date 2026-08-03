@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DenominatorChart from '../components/charts/DenominatorChart.svelte';
+import PersistenceCorr from '../components/charts/PersistenceCorr.svelte';
+---
+
+<BaseLayout title="Sensitivity">
+  <section class="card">
+    <h2>Score 分母分布（D = C^d − C^a）</h2>
+    <p class="convention-note">min 2.4 · P10 87 · median 295 —— 8 个站点 D&lt;100，score 对微小成本变化敏感</p>
+    <DenominatorChart client:load />
+  </section>
+  <section class="card">
+    <h2>Persistence 归因检验（负证据）</h2>
+    <PersistenceCorr client:load />
+  </section>
+</BaseLayout>

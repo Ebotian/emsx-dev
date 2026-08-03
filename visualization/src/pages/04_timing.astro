@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Timeline from '../components/charts/Timeline.svelte';
+---
+
+<BaseLayout title="Timing">
+  <section class="card">
+    <h2>决策时刻与信息结构（step 1, site 1）</h2>
+    <p class="convention-note">t_decision = 行 t+96 的时间戳（代码+论文+数据证明）</p>
+    <Timeline client:load />
+  </section>
+</BaseLayout>

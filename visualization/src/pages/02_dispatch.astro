@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DispatchChart from '../components/charts/DispatchChart.svelte';
+---
+
+<BaseLayout title="Dispatch">
+  <section class="card">
+    <h2>能量平衡 dispatch（site 1，第一周）</h2>
+    <p class="convention-note">悬停任一时步显示能量分解：import = z + u·P·Δt；控制器切换对比</p>
+    <DispatchChart client:load />
+  </section>
+  <section class="card">
+    <h2>能量平衡关系</h2>
+    <p style="font-size:13px;color:#1a1a1a;">
+      SOC<sub>t+1</sub> = SOC<sub>t</sub> + (η<sub>c</sub>·u⁺ − u⁻/η<sub>d</sub>)·P·Δt/C
+      &nbsp;·&nbsp; import = z + u·P·Δt
+      &nbsp;·&nbsp; u ∈ [−1, 1], SOC ∈ [0, 1]
+    </p>
+  </section>
+</BaseLayout>

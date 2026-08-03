@@ -37,5 +37,10 @@
     "title": "Process Differences",
     "cumCost": "Cumulative cost (same representative week)",
     "soc": "SOC trajectory"
+  },
+  "forecast": {
+    "title": "Forecast Accuracy / Confidence",
+    "note": "70 sites, training periods, vs forecast horizon (15min..24h)",
+    "coverage": "Nominal vs empirical coverage calibration"
   }
 }

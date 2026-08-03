@@ -37,5 +37,10 @@
     "title": "过程差异",
     "cumCost": "累计成本（同一代表周）",
     "soc": "SOC 轨迹"
+  },
+  "forecast": {
+    "title": "预测准确性 / 置信度",
+    "note": "70 站点训练期，随 forecast horizon (15min..24h)",
+    "coverage": "名义 vs 经验覆盖率校准"
   }
 }
