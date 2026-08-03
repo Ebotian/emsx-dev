@@ -85,8 +85,7 @@ labeled separately throughout. See `visualization/README.md`.
 
 | Path | Contents |
 |---|---|
-| `sdp_*.jl` | Julia drivers: SDP-AR(1) calibration/simulation/evaluation, rollouts, parameter sweeps |
-| `sweep_parallel.jl`, `run_sweep.sh` | parameter sweep driver + launcher |
+| `experiments/` | Julia drivers: SDP-AR(1) calibration/simulation/evaluation, rollouts, parameter sweeps, sweep launcher |
 | `src/` | shared modules: environment identity, provenance, run contract (leased, SHA-256-guarded runs) |
 | `scripts/` | Julia environment bootstrap, locked runner, baseline capture |
 | `configs/` | locked experiment configuration (`wdwe2_k20.toml`) |
@@ -96,7 +95,7 @@ labeled separately throughout. See `visualization/README.md`.
 | `leanproof/` | Lean 4 formalization |
 | `typst_conclusion/` | the audit report (source + PDF) |
 | `visualization/` | interactive results site |
-| `docs/` | design specs and plans |
+| `docs/` | design specs, plans, and research notes (`optimation01.md`) |
 | `paper/` | paper sources and figures |
 
 ## Requirements
@@ -127,9 +126,9 @@ path, then installs dependencies into the project-local depot
 ### Locked baseline reproduction (70 sites)
 
 ```sh
-PHASE=calibrate RUN_ID=local ./scripts/julia_locked.sh sdp_ar1_wdwe2.jl
-PHASE=simulate  RUN_ID=local ./scripts/julia_locked.sh sdp_ar1_wdwe2.jl
-PHASE=evaluate  RUN_ID=local ./scripts/julia_locked.sh sdp_ar1_wdwe2.jl
+PHASE=calibrate RUN_ID=local ./scripts/julia_locked.sh experiments/sdp_ar1_wdwe2.jl
+PHASE=simulate  RUN_ID=local ./scripts/julia_locked.sh experiments/sdp_ar1_wdwe2.jl
+PHASE=evaluate  RUN_ID=local ./scripts/julia_locked.sh experiments/sdp_ar1_wdwe2.jl
 ```
 
 Configuration comes from `configs/wdwe2_k20.toml` (override with
@@ -140,7 +139,7 @@ published atomically by `src/RunContract.jl`; the expected mean score is
 ### Parameter sweep
 
 ```sh
-./run_sweep.sh   # 6 discretization variants of SDP-AR(1), run sequentially
+./experiments/run_sweep.sh   # 6 discretization variants of SDP-AR(1), run sequentially
 ```
 
 ### Visualization site

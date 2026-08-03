@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT="$ROOT/sdp_ar1_param.jl"
+SCRIPT="$ROOT/experiments/sdp_ar1_param.jl"
 JULIA_RUNNER="$ROOT/scripts/julia_locked.sh"
 LOGDIR="$ROOT/results_sdp/sweep_logs"
 mkdir -p "$LOGDIR"

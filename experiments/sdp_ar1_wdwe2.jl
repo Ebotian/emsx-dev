@@ -17,7 +17,7 @@ using ProgressMeter
 using Statistics
 using TOML
 
-const ROOT = normpath(abspath(@__DIR__))
+const ROOT = normpath(dirname(abspath(@__DIR__)))
 include(joinpath(ROOT, "src", "EnvironmentIdentity.jl"))
 include(joinpath(ROOT, "src", "Provenance.jl"))
 include(joinpath(ROOT, "src", "RunContract.jl"))

@@ -10,7 +10,7 @@ using Test
 using TOML
 
 const ROOT = normpath(joinpath(@__DIR__, ".."))
-const RUNNER = joinpath(ROOT, "sdp_ar1_wdwe2.jl")
+const RUNNER = joinpath(ROOT, "experiments", "sdp_ar1_wdwe2.jl")
 const LOCKED_JULIA = joinpath(ROOT, "scripts", "julia_locked.sh")
 const FORMAL_CONFIG = joinpath(ROOT, "configs", "wdwe2_k20.toml")
 const FORMAL_INPUT_MANIFEST =

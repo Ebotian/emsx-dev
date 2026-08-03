@@ -28,7 +28,7 @@ const SHELL_ROOT = normpath(joinpath(@__DIR__, ".."))
     locked_launcher = read(joinpath(SHELL_ROOT, "scripts", "julia_locked.sh"), String)
     @test occursin("JULIA_PKG_OFFLINE='true'", locked_launcher)
 
-    sweep = read(joinpath(SHELL_ROOT, "run_sweep.sh"), String)
+    sweep = read(joinpath(SHELL_ROOT, "experiments", "run_sweep.sh"), String)
     strict_mode = only(filter(line -> startswith(line, "set "), split(sweep, '\n')))
     @test strict_mode == "set -euo pipefail"
 
