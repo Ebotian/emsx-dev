@@ -16,10 +16,22 @@ rollout，baseline 仍胜出。
 
 ## 一、索引审计（已完成，时间戳实证）
 
-**A. 96 步信息泄漏（已修复）**
-原版 EMSx `Information` 的 forecast 取自决策窗口 `t+1:t+96` 中时间最早
-的行（`data[end]` = 行 `t+1`）；此前一次本地修改改为行 `t+96`（未来
-24 h），构成泄漏。已恢复行 `t+1`（显式 timestamp 排序），时间戳测试
+**A. forecast origin 恢复（interface violation，非时间泄漏）**
+原版 EMSx `Information` 构造的 forecast 取自决策窗口 `t+1:t+96` 中时间
+最早的行（`data[end]` = 行 `t+1`）；此前一次本地修改改为行 `t+96`。
+第六版审查后明确三概念区分：
+
+- **时间因果性**：按决策时刻 = 行 t+96（四·补7 证明），行 t+96 forecast
+  的发布时间 = 决策时刻，**满足 t_issue ≤ t_decision，非时间泄漏**。
+- **Information API 许可**：官方构造器仅暴露行 t+1 的 forecast
+  （`data[end,...]`），行 t+96 forecast 不在 Information 对象内——读取它
+  需绕过接口，属 **benchmark interface violation**。
+- **官方协议**：接口即协议信息集。
+
+已恢复接口暴露的行 t+1 forecast（显式 timestamp 排序），时间戳测试
+13/13 锁定；"96 步泄漏"表述废弃，改为"恢复官方接口暴露的 forecast
+origin"。行 t+96（决策时刻）最新一步 forecast 是否存在于原始数据、
+其价值如何，属未测试的开放问题（audit 记录，未评估）。
 13/13 锁定。
 
 **B. 结算行对齐（index 96 = 结算对齐索引）**
@@ -279,6 +291,62 @@ persistence 归因检验：corr(δR², δS) = -0.095（70 站点）——无经�
 10. **标题**：改 "An Audit of Settlement Alignment, Information Timing,
     and Energy Conservation in EMSx Battery Control: Online Rollout under
     a Physical Evaluation"。
+
+## 四·补10、第六版审查改善项（忽略继续优化项）
+
+1. **forecast audit 重写**：三概念区分（时间因果性 / Information API
+   许可 / 官方协议）——行 t+96 forecast 非时间泄漏（发布时间=决策时刻），
+   但非官方接口提供，读取属 interface violation。"96 步泄漏"表述废弃。
+2. **off-by-one 澄清**：settlement = min(t+97, horizon+96)，最后两步
+   clamp 到 nrow（站点 1：horizon=17568，最后决策行 17664=nrow，
+   settlement clamp 到 17664）——无越界，是文档表述问题。
+3. **§4.3 修正**：R_FE96 是多场景 rollout（20 scenarios + CVaR），
+   非 single-scenario（single-scenario 是 R_P）。
+4. **§4.8 修正**：R_P 改"strongest proposed non-baseline controller"
+   （baseline 0.7677 > R_P 0.7442）。
+5. **两套 r_infeasible 分开标注**：pre-projection（1e-9 松弛）5.2e-5 vs
+   strict-projection 0；正式榜单只用后者。
+6. **environment oracle 措辞**：改 "environment-consistent approximate
+   DP oracle"（21 点网格 + 最近邻 + per-period V_T=0，无 exact 下界保证）。
+7. **forecast 归因限定**：两组控制器同时改变状态语义/转移模型/误差量化/
+   CVaR 权重/选择器/continuation——"未隔离 forecast quality 与
+   selector/state-model 差异"。
+8. **风险聚合定义**：2474 period pooled 是 exposure-weighted portfolio
+   estimand；mean cost 2235.7（per-site 全程）与 E[J]=1208.9
+   （per-period pooled）不同单位。
+9. **Abstract**：real-time → "online stochastic control"。
+
+**忽略（继续优化项）**：full-sequence oracle（J_PF^full）、决策时刻最新
+一步 forecast 路线（S_t=(SOC, z_t, ẑ_{t,t+1})）、正交奖励场、统计目标
+（LCB>0 证明）——待出现超过 baseline 的候选后再进行。
+
+## 四·补11、第七版审查打磨项
+
+1. **末端边界效应**：settlement = min(t+97, horizon+96)，最后两步 clamp
+   到 nrow；最后一步 settlement=decision row（每 period 重复）。成本占比
+   ~1%（R_P 1.021% / S_AR 1.034% / R_FE96 1.057%，2474 periods）。
+   文档限定为"interior steps timestamp-verified; terminal uses clamped
+   convention"，修正（H=nrow-97 或删最后一步）已记录，未重跑。
+2. **current-time forecast**：行 t+96 forecast 存在于原始数据（行 i 持有
+   行 i 发布的 forecast），但官方 Information 接口不暴露；部署导向信息
+   协议未评估。双信息轨道：I_EMSx ⊂ I_deployment，两轨道结果不混合。
+3. **主指标**：M_0(π) = Σω_i[C_i(S_AR)−C_i(π)]，等站点权重 1/70
+   （相对 dummy 排序相同）；与风险 pooled estimand 权重差异已写明。
+4. **OpenEvolve 弱化**："在当前三参数族与有限搜索预算内，超参未弥补
+   结构差距"；选择器/状态语义为推断而非已证明的唯一原因。
+5. **行为克隆弱化**：负结果 consistent with bang-bang/flat optima；
+   分类/集值目标/decision-focused loss 未测试，结构性解释为假说。
+6. **Lean 句统一**："selected algebraic properties of the
+   finite-benchmark score and resampling summaries are machine-checked
+   with Lean"（§5 与 §7 一致）。
+7. **Typst 排版修复**：§3.1 row t+97 等式断行（曾产生意外一级标题）已
+   改为单行（i.e. decision time + 15 min）。
+8. **参考文献**：补 EMSx 论文标题、Julia 1.12.6 / Python 3.14.6 /
+   scipy 1.18.0 / Lean 4.32.2 / mathlib v4.33.0-rc1、仓库 commit hash
+   （1ab0115 / 3467500 / 92fa399）。
+
+**忽略（继续优化项）**：full-sequence/cyclic physical oracle
+（J_PF^full）、部署信息协议路线、全量重跑修正末端边界。
 
 ## 五、OpenEvolve 自动参数优化（物理口径）
 用 OpenEvolve（DeepSeek LLM 进化框架）优化 rollout 超参，fitness = 3 站点

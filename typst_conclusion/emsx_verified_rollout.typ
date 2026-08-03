@@ -20,12 +20,13 @@
 
 == Abstract
 
-This paper reports a real-time stochastic control method for grid-connected
+This paper reports an online stochastic control method for grid-connected
 microgrid battery systems and a two-track evaluation of it. The method uses
 the settlement-aligned horizon-96 forecast of the EMSx benchmark, a
 site-specific 24-hour-ahead forecast-error distribution, and a
-risk-sensitive Bellman selector. We audit two indexing issues (a 96-step
-forecast leak that was removed; the horizon-1 vs horizon-96 forecast index)
+risk-sensitive Bellman selector. We audit two indexing issues (the
+forecast origin exposed by the official `Information` interface vs row
+$t + 96$; the horizon-1 vs horizon-96 forecast index)
 and an energy-conservation violation of the benchmark environment: the
 stage-cost function credits discharge energy from an empty battery while
 the state of charge is merely clamped to zero.
@@ -63,11 +64,15 @@ by the maximum possible gain given by a perfect-prediction oracle.
 
 This paper's contributions are audits, not new controllers:
 
-+ *Information-leak audit.* The forecast origin is the earliest row of the
-  decision window (row $t + 1$), as in the original EMSx implementation; an
-  earlier local modification had moved it to row $t + 96$, a 96-step
-  information leak. We restored the original semantics and locked the
-  contract with a timestamp-level test.
++ *Forecast-origin audit.* The official `Information` constructor exposes
+  the forecast issued at the earliest row of the decision window (row
+  $t + 1$, a day-ahead forecast). An earlier local modification moved the
+  origin to row $t + 96$. Under the reconstructed decision timestamp
+  (Section 4.11) the row-$t + 96$ forecast is issued at the decision time
+  and is not temporally noncausal — but it is not exposed by the official
+  `Information` interface, so reading it would be a *benchmark interface
+  violation*, not a temporal leak. We restored the interface-exposed
+  origin (row $t + 1$) and locked the contract with timestamp tests.
 + *Settlement-alignment audit.* The simulator settles step $t$ against the
   actual net demand at row $t + 97$, which is predicted by `load_95` of
   row $t + 1$ (index 96), not `load_00` (index 1). We prove this with a
@@ -137,14 +142,16 @@ site 1:
 
 The decision time of step 1 is the timestamp of row $t + 96$ (row 97 =
 2014-07-21 00:00); see Section 4.11 for the code-level proof. Facts:
-`forecast_load[96]`'s target equals the settlement timestamp (row $t + 97$
-= decision time + 15 min); `forecast_load[1]`'s target (row $t + 2$) is
-94 steps in the *past* and useless. The forecast origin (row $t + 1$) is a
-day-ahead forecast issued 95 steps before the decision — causal. The
-baseline reads `load[1] - pv[1]`, the *current* actual at row $t + 96$
-($w_t$), as its state — causal. The forecast-error rollout reads only the
-forecast arrays. The 96-step leak (row $t + 96$ forecast
-origin) is removed.
+`forecast_load[96]`'s target equals the settlement timestamp (row $t + 97$, i.e. decision time + 15 min); `forecast_load[1]`'s target (row $t + 2$) is
+94 steps in the *past* and useless. The forecast origin exposed by the
+official `Information` interface is row $t + 1$ (a day-ahead forecast
+issued 95 steps before the decision) — causal. The baseline reads
+`load[1] - pv[1]`, the *current* actual at row $t + 96$ ($w_t$), as its
+state — causal. The forecast-error rollout reads only the forecast arrays
+exposed by the interface. The row-$t + 96$ forecast is issued at the
+decision time (not temporally noncausal) but is *not* exposed by the
+official interface; reading it would be a benchmark interface violation
+(Section 4.11).
 
 === 3.2 Forecast-Error Law and Rollout
 
@@ -167,8 +174,10 @@ $1.1 dot 10^-3$.
 *Environment-consistent track.* The oracle is the backward DP (21-point
 SOC grid, nearest-neighbor interpolation, terminal $V_T = 0$ per period,
 SOC carried). Because the environment credits empty-battery discharge, this
-DP is the environment-consistent optimum. An independent LP with the SOC
-lower bound removed reproduces the DP exactly.
+DP is the environment-consistent *approximate* oracle (21-point grid,
+nearest-neighbor interpolation; no exact lower-bound guarantee). An
+independent LP with the SOC lower bound removed reproduces the DP's
+objective on the tested instances.
 
 *Physical track.* The oracle is a sequence of independent per-period
 perfect-foresight LPs (scipy HiGHS), $J_("PF")^("period")$, each with the
@@ -204,8 +213,9 @@ stored energy, $E_"phantom"$ the corresponding credited-but-nonexistent
 energy, and $r_(0,-1)$ the fraction of steps with SOC = 0 and $u = -1$.
 The candidate and the oracle discharge from an empty battery on essentially
 every step; the baseline is physically clean. The physical variant of the
-candidate has $r_"infeasible" = 5.2 dot 10^-5$ and a 1200-fold reduction in
-phantom energy.
+candidate has $r_"infeasible" = 5.2 dot 10^-5$ (pre-projection
+implementation) and a 1200-fold reduction in phantom energy; the final
+strict-projection implementation has $r_"infeasible" = 0$.
 
 === 4.2 Environment-Consistent Track
 
@@ -245,10 +255,11 @@ Under the physical convention the candidate is below the baseline. The
 value function itself is already energy-conserving (Section 4.5: the
 offline value iteration rejects infeasible discharges through its
 next-state bounds check; a "physical" recalibration is bit-identical).
-The gap comes from the selector structure — the single-scenario greedy
-rollout versus the baseline's expectation over the AR noise
-distribution — and from the state semantics, not from value-function
-physics (four sites even score below the dummy).
+The gap comes from the selector structure — the forecast-error
+multi-scenario rollout with a CVaR-regularized selector versus the
+baseline's AR-conditioned SDP selector — and from the state semantics,
+not from value-function physics (four sites even score below the dummy).
+(The single-scenario controller is $R_P$; see Sections 4.7 and 4.12.)
 
 === 4.4 Settlement Alignment under Physical Constraints
 
@@ -284,7 +295,10 @@ computes the next SOC with the clamped simulator dynamics
 discharging an empty battery passes the check and gets full bill credit.
 The physical action filter added to the selector (Section 3.3) is the
 correct repair; it reduces the infeasible-action rate from 0.996 to
-5.2e-5.
+5.2e-5 in the pre-projection implementation (with a $10^-9$ filter
+slack). The final implementation uses a strict closed-interval projection
+onto $U(x)$, giving an infeasible-action rate of exactly zero (Section
+4.9, Section 6).
 
 === 4.6 Physical-Convention Index Comparison (70 sites)
 
@@ -380,11 +394,15 @@ configurations were measured on the 70 test sites:
   [Per-site classifier (5 classes)], [0.307], [too coarse],
 )
 
-Behavior cloning does not beat the model-based controllers: the oracle's
-optimal actions are bang-bang (43% of steps at the power limit, 47% at
-zero) with flat optima, which a single-step regressor cannot represent
-well. The machine-learning track is recorded as a negative result; the
-model-based Plan-A selector remains the strongest honest controller.
+Behavior cloning does not beat the model-based controllers. The negative
+result is *consistent with* the oracle's bang-bang actions (43% of steps
+at the power limit, 47% at zero) and non-unique flat optima; dedicated
+classification, set-valued targets, or decision-focused losses were not
+tested, so the structural explanation remains a hypothesis. The
+machine-learning track is recorded as a negative result; the
+model-based $R_P$ selector remains the strongest proposed non-baseline
+controller (the strongest overall controller is the SDP-AR(1) baseline
+$S_("AR")$, 0.7677 vs 0.7442).
 
 *Data split disclosure.* The oracle labels come from LP solutions of the
 *training* periods (24 periods per site, excluding the 7990-row period 0),
@@ -399,9 +417,13 @@ problem".
 
 === 4.9 Physical-Convention Leaderboard (Score and Raw Cost)
 
-The primary metric is the raw total cost improvement over the dummy (mean
-cost per site; dummy mean = 2496.7). The normalized score is secondary.
-The physical score denominator $D_i = C_i^d - C_i^a$ has a heavy tail:
+The primary metric is the raw total cost improvement of a controller over
+the current best baseline, $M_0(pi) = sum_i omega_i [C_i(S_("AR")) -
+C_i(pi)]$ with equal site weights $omega_i = 1/70$ (relative to the
+dummy it has the same ranking, since the dummy is constant). The
+normalized score is secondary; the risk coordinates use a pooled-period
+exposure-weighted estimand (different weights, disclosed there). The
+physical score denominator $D_i = C_i^d - C_i^a$ has a heavy tail:
 min 2.4, 10th percentile 87, median 295, max 863; 8 of 70 sites have
 $D_i < 100$ and 4 have $D_i < 50$, where the score is very sensitive to
 small cost changes.
@@ -422,15 +444,24 @@ small cost changes.
 All controllers are causal (Section 4.11) and physically constrained
 (strict projection, zero infeasible actions). $S_("AR")$ leads; $R_P$ is
 the strongest proposed non-baseline rollout. The forecast-state
-controllers underperform because the day-ahead forecast is noisier than
-the current actual, not because of information timing.
+controllers' underperformance is *consistent with* the lower predictive
+quality of the stale day-ahead forecast, but the experiments do not
+isolate forecast quality from the selector and state-model differences
+(the two groups differ in state semantics, transition model, error
+quantization, and selector form).
 
-*Risk coordinates.* Pooling per-period costs over all sites (n = 2474):
+*Risk coordinates.* Pooling per-period costs over all sites (n = 2474;
+this is an *exposure-weighted portfolio estimand* — large-cost and
+many-period sites dominate the tail; a per-site CVaR aggregated by equal
+weights is a different estimand and is not reported):
 $S_("AR")$ achieves the best mean and tail risk
 ($E[J] = 1208.9$, $"CVaR"_0.9[J] = 15920.3$), $R_P$ is close
 ($E[J] = 1216.9$, $"CVaR"_0.9[J] = 15928.2$), and $R_("FE96")$ is clearly
 worst ($E[J] = 1273.4$, $"CVaR"_0.9[J] = 15968.8$). The CVaR-weighted
-objective of $R_("FE96")$ does not buy tail-risk reduction here.
+objective of $R_("FE96")$ does not buy tail-risk reduction here. Unit
+note: the leaderboard mean cost (2235.7) is the per-site mean over the
+whole test horizon, while $E[J]$ here is the per-period pooled mean; the
+two use different aggregation units and are not directly comparable.
 
 *Persistence attribution.* The hypothesis that $R_P$ wins where
 persistence is close to the AR model was tested per site:
@@ -457,11 +488,13 @@ validation of the best program:
 )
 
 The optimizer worked (3-site fitness improved by 0.146), but the 70-site
-improvement is marginal (+0.0044) and no site beats the baseline. The
-bottleneck is not the hyper-parameters and not the value-function physics
-(Section 4.5: the value function is already energy-conserving); the gap
-to the baseline lies in the selector structure and the state semantics,
-which a change of $(lambda, alpha, "margin")$ cannot repair. These runs
+improvement is marginal (+0.0044) and no site beats the baseline. Within
+the searched three-parameter family and limited exploratory budget,
+hyperparameter changes did not close the structural gap to the baseline;
+the value-function physics is not the cause (Section 4.5: the value
+function is already energy-conserving). The selector structure and state
+semantics are a plausible explanation, stated as an inference rather than
+a proven unique cause. These runs
 are an *exploratory* evaluation: the 3-site fitness set is a subset of the
 70-site report set, so the final set has seen development feedback and
 cannot serve as an independent validation.
@@ -489,6 +522,19 @@ proven from four independent pieces of evidence:
    row-$t + 96$ interpretation makes this the current observation.
 4. *The horizon* is `nrow - 96`; the last decision (step `nrow - 96`)
    then falls at the last row, consistent with the window `t+1:t+96`.
+   The settlement formula is `min(t + 96 + 1, horizon + 96)`; for the
+   last two steps ($t = "horizon"-1$ and $t = "horizon"$) this clamps to
+   `nrow`, so the settlement row never exceeds the data range (site 1:
+   `horizon` = 17568, last decision row 17664 = `nrow`, settlement clamps
+   to 17664). *Boundary caveat:* for the final step the settlement row
+   equals the decision row, so the last action of every period is settled
+   against the same actual as its own decision — a clamped convention
+   inherited from the official simulator. Its cost share is about 1% of
+   the total (R_P 1.021%, S_AR 1.034%, R_FE96 1.057%, 2474 periods);
+   the timestamp contract is therefore stated as *interior steps
+   timestamp-verified; the terminal boundary uses the clamped
+   convention*. A corrected horizon ($H = "nrow" - 97$) or dropping the
+   final step would remove it; this is recorded, not re-run here.
 
 Runtime assertions at the decision time of step 1 (site 1,
 $t_"decision"$ = 2014-07-21 00:00):
@@ -518,6 +564,37 @@ Section 4.12: the gap between the baseline (0.768) and the forecast-state
 SDP selector (0.569) is a *state-semantics mismatch* (feeding a
 settlement-forecast value into a value function whose $z$-coordinate
 means the current actual), not an information-level difference.
+
+*Forecast admissibility: three distinct notions.* Temporal causality,
+`Information`-API admissibility, and the official benchmark protocol must
+not be conflated:
+
++ *Temporal causality* ($t_"issue" <= t_"decision"$): the forecast issued
+  at row $t + 96$ satisfies this (its issue time equals the decision
+  time), so accessing it is *not* a temporal information leak under the
+  reconstructed decision timestamp.
++ *`Information`-API admissibility*: the official constructor exposes the
+  forecast of row $t + 1$ only (`data[end, ...]` in the original code);
+  the row-$t + 96$ forecast is not present in the `Information` object.
+  Reading it would require bypassing the interface — a *benchmark
+  interface violation*.
++ *Official benchmark protocol*: the interface is the protocol's
+  information set; a controller may only use what the interface provides.
+
+The earlier "96-step leak" terminology is therefore replaced: the fix
+restored the forecast origin exposed by the official `Information`
+interface. The row-$t + 96$ (current-time) forecast *exists in the raw
+data* (row $i$ holds the forecast issued at row $i$), but it is not
+exposed by the official `Information` interface; its value under a
+separate deployment-oriented information protocol is not evaluated here.
+
+*Two information tracks.* The official benchmark track uses only
+$cal(I)_t^"EMSx"$ (the interface-exposed day-ahead forecast). A
+deployment track would allow the latest current-time forecast
+$hat z_(t,t+1)^"latest"$; $cal(I)_t^"EMSx" subset cal(I)_t^"deployment"$.
+Both are causal, but results from the two tracks must not be mixed into
+one leaderboard; the deployment track is a candidate route, not evaluated
+here.
 
 === 4.12 Controller Naming and the Forecast-State Experiment
 
@@ -552,18 +629,20 @@ deployment quadrant:
 )
 
 $S_("AR")$ is the strongest controller; $R_P$ is the strongest proposed
-non-baseline rollout. The forecast-state variants underperform because the
-day-ahead forecast is much noisier than the current actual
-($R^2 = 0.77$ vs 0.95), not because of information timing.
+non-baseline rollout. The forecast-state variants underperform, consistent
+with the lower predictive quality of the stale day-ahead forecast
+($R^2 = 0.77$ vs 0.95 for the current actual); the experiments do not
+isolate forecast quality from selector and state-model differences.
 
 == 5. Formal Verification with Lean
 
 
 
-The mathematical properties of the score and of the statistical endpoints
-are verified with Lean (Lean 4.32.2, mathlib v4.33.0-rc1,
-`Leanproof/Reliability.lean`; build green, no `sorry`/`axiom`/`admit`).
-The theorems are abstract and convention-independent.
+Selected algebraic properties of the finite-benchmark score and
+resampling summaries are machine-checked with Lean (Lean 4.32.2, mathlib
+v4.33.0-rc1, `Leanproof/Reliability.lean`; build green, no
+`sorry`/`axiom`/`admit`). The theorems are abstract and
+convention-independent.
 
 === 5.1 Theorem 1: Score in [0,1]
 
@@ -687,7 +766,10 @@ not connect either oracle to its numerical implementation.
 We audited the EMSx real-time evaluation and quantified a dominant
 confound. The settlement alignment of the forecast index is
 timestamp-proven (index 96 targets the settlement row exactly), and the
-96-step information leak is removed. The benchmark environment credits
+forecast origin exposed by the official `Information` interface (row
+$t + 1$) is restored (the row-$t + 96$ forecast is not temporally
+noncausal under the reconstructed decision time but is not exposed by the
+interface). The benchmark environment credits
 discharge energy from an empty battery; the perfect-prediction oracle and
 the unconstrained candidate exploit this on essentially every step, and
 the environment-consistent score of 0.997348 is a measure of exploit
@@ -702,25 +784,33 @@ rollout is $R_P$ (score 0.744, savings 253.3, 11/70 above the baseline,
 no negative-score sites). Both use the current actual at row $t + 96$ as
 their state, which the code-level proof (Section 4.11) shows is causal
 (decision time = row $t + 96$). The forecast-error rollout $R_("FE96")$
-(0.579) and the forecast-state SDP selector (0.569) underperform because
-the day-ahead forecast is much noisier than the current actual
-($R^2 = 0.77$ vs 0.95) — a state-quality effect, not an information-timing
-effect. A
+(0.579) and the forecast-state SDP selector (0.569) underperform, which is
+consistent with the lower predictive quality of the stale day-ahead
+forecast ($R^2 = 0.77$ vs 0.95); the experiments do not isolate forecast
+quality from selector and state-model differences. A
 behavior-clone of the physical LP oracle (per-site MLP) reaches 0.573 and
 does not beat the model-based controllers: the oracle's bang-bang optimal
 actions and flat optima are poorly captured by a single-step regressor.
 The audits, the timestamp contract, the exploit metrics, the physical
 oracle, and the two-track comparison are reproducible from this
-repository; the mathematical properties of the score and of the
-statistical endpoints are machine-checked with Lean.
+repository; selected algebraic properties of the finite-benchmark score
+and resampling summaries are machine-checked with Lean.
 
 == References
 
-[1] EMSx benchmark paper: see `paper/emsx_hal_v3.tex` in the repository.
+[1] A. Le Franc, et al., "EMSx: a numerical benchmark for energy
+    management systems", `paper/emsx_hal_v3.tex` in this repository
+    (the original EMSx.jl reference implementation).
 
-[2] Lean 4 + mathlib: `https://leanprover-community.github.io`
+[2] Lean 4 + mathlib (Lean 4.32.2, mathlib v4.33.0-rc1):
+    `https://leanprover-community.github.io`
 
-[3] HiGHS linear programming solver: `https://highs.dev` (via scipy)
+[3] HiGHS linear programming solver (via scipy; Julia 1.12.6, Python
+    3.14.6, scipy 1.18.0): `https://highs.dev`
+
+[4] Repository commits: audit worktree `1ab0115`, EMSx.jl `3467500`
+    (leak-free Information fix), report `92fa399`; dataset at
+    `dataset/test` in the worktree (regenerated by download scripts).
 
 #v(2cm)
 #align(center)[*End of document*]

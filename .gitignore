@@ -26,6 +26,15 @@ paper/*.xlsx
 /api.json
 /toapi.py
 
+# Personal infra / experiments — never publish (may hold LAN credentials)
+/mac.sh
+/sshmac.sh
+/export_kimi_ccswitch_registry.py
+/leanproof_mine/
+
+# Python bytecode in visualization precompute
+__pycache__/
+
 # OS files
 .DS_Store
 *.swp
