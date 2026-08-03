@@ -24,7 +24,7 @@
           if (!p) return '';
           const head = `<b>${fmtTime(p.minutes)}</b> (horizon ${p.horizon}, n=${p.n})`;
           const rows = arr
-            .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value).toFixed(1)} kWh`)
+            .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value[1]).toFixed(1)} kWh`)
             .join('<br/>');
           return `${head}<br/>${rows}`;
         },

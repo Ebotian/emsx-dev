@@ -30,7 +30,7 @@
           if (!p) return '';
           const head = `<b>${fmtTime(p.minutes)}</b> (horizon ${p.horizon}, n=${p.n})`;
           const rows = arr
-            .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value).toFixed(q.seriesName === 'R²' ? 4 : 2)}`)
+            .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value[1]).toFixed(q.seriesName === 'R²' ? 4 : 2)}`)
             .join('<br/>');
           return `${head}<br/>${rows}`;
         },

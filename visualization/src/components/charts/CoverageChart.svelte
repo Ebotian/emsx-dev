@@ -29,7 +29,7 @@
           const p = pts[arr[0]?.dataIndex];
           if (!p) return '';
           const head = `<b>${fmtTime(p.minutes)}</b> (horizon ${p.horizon})`;
-          const rows = arr.map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value).toFixed(3)}`).join('<br/>');
+          const rows = arr.map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value[1]).toFixed(3)}`).join('<br/>');
           return `${head}<br/>${rows}`;
         },
       },
