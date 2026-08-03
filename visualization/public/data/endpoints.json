@@ -1,0 +1,42 @@
+{
+ "Dummy": {
+  "score": 0.0,
+  "cost": 2496.6877,
+  "paperScore": null
+ },
+ "MPC": {
+  "score": 0.2911,
+  "cost": 2425.4535,
+  "paperScore": 0.487
+ },
+ "OLFC-10": {
+  "score": -1.801,
+  "cost": 3067.7743,
+  "paperScore": 0.513
+ },
+ "SDP": {
+  "score": 0.5764,
+  "cost": 2287.2256,
+  "paperScore": 0.691
+ },
+ "SDP-AR(1)": {
+  "score": 0.7677,
+  "cost": 2235.7479,
+  "paperScore": 0.794
+ },
+ "S_AR": {
+  "score": 0.7677,
+  "cost": 2235.7479,
+  "paperScore": null
+ },
+ "R_P": {
+  "score": 0.7442,
+  "cost": 2243.374,
+  "paperScore": null
+ },
+ "R_FE96": {
+  "score": 0.5794,
+  "cost": 2300.8188,
+  "paperScore": null
+ }
+}
