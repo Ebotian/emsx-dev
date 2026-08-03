@@ -37,8 +37,7 @@
         {
           type: 'bar',
           data: journey.map((s) => s.score),
-          itemStyle: { color: (p: { dataIndex: number }) =>
-            p.dataIndex === 0 ? palette.danger : palette.accent },
+          itemStyle: { color: palette.accent },
           label: { show: true, position: 'top', fontFamily: font },
         },
       ],

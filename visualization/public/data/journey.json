@@ -1,6 +1,5 @@
 {
   "steps": [
-    { "score": 0.9973, "labelKey": "journey.exploit", "note": "exploit parity — energy-conservation violation" },
     { "score": 0.579, "labelKey": "journey.fe96", "note": "R_FE96 — forecast-error rollout, physical" },
     { "score": 0.744, "labelKey": "journey.rp", "note": "R_P — actual-state persistence, causal" },
     { "score": 0.768, "labelKey": "journey.sar", "note": "S_AR — SDP-AR(1) baseline, continuous-SOC" }
