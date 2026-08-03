@@ -32,7 +32,9 @@
   },
   "perSite": {
     "title": "Per-Site Differences",
-    "deltaHeat": "Pairwise per-site cost difference"
+    "deltaHeat": "Pairwise per-site cost difference",
+    "gain": "Per-site final-result gains (paper gain_by_rmse / gain_by_gap)",
+    "gainNote": "70 sites ranked by 24h forecast RMSE or site id; dashed = physical LP upper bound, dotted = dummy zero gain; controllers selectable"
   },
   "process": {
     "title": "Process Differences",
@@ -49,5 +51,11 @@
     "siteRmseNote": "70 sites ranked by 24h-ahead net-demand forecast RMSE; 15min-ahead shown as reference",
     "confidenceFamily": "Per-site forecast confidence curve family (R², %)",
     "confidenceFamilyNote": "One curve per site: median 91.1% at 15min → 70.3% at 24h; P5–P95 envelope"
+  },
+  "journey": {
+    "exploit": "exploit parity (0.9973)",
+    "fe96": "R_FE96 — forecast-error rollout, physical",
+    "rp": "R_P — persistence rollout, causal",
+    "sar": "S_AR — SDP-AR(1) baseline"
   }
 }

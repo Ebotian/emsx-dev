@@ -32,7 +32,9 @@
   },
   "perSite": {
     "title": "逐站点差异",
-    "deltaHeat": "两两控制器逐站点成本差"
+    "deltaHeat": "两两控制器逐站点成本差",
+    "gain": "逐站点最终结果对比（对标论文 gain_by_rmse / gain_by_gap）",
+    "gainNote": "70 站点按 24h 预测 RMSE 或站点号排序；虚线 = 物理 LP 上界，点线 = dummy 零 gain；控制器可勾选"
   },
   "process": {
     "title": "过程差异",
@@ -49,5 +51,11 @@
     "siteRmseNote": "70 站点按 24h 净需求预测 RMSE 升序；15min-ahead 为参照",
     "confidenceFamily": "逐站点预测置信度曲线族（R²，%）",
     "confidenceFamilyNote": "70 站点各一条曲线：15min 中位 91.1% → 24h 中位 70.3%；P5–P95 包络"
+  },
+  "journey": {
+    "exploit": "漏洞利用平分 (0.9973)",
+    "fe96": "R_FE96 — 预测误差 rollout，物理口径",
+    "rp": "R_P — 持续性 rollout，因果",
+    "sar": "S_AR — SDP-AR(1) 基线"
   }
 }

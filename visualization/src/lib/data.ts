@@ -26,5 +26,6 @@ export const data = {
   perSite: () => cached<Record<ControllerId, SiteMap>>('/data/per_site.json'),
   process: (c: string) => cached<ProcessSeries>(`/data/process/${c}.json`),
   accuracy: () => cached<AccuracyPoint[]>('/data/accuracy.json'),
-  journey: () => cached<{ step: string; score: number; labelKey: string }[]>('/data/journey.json'),
+  journey: () =>
+    cached<{ steps: { step: string; score: number; labelKey: string }[] }>('/data/journey.json').then((d) => d.steps),
 };

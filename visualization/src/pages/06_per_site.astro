@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PerSiteScatter from '../components/charts/PerSiteScatter.svelte';
+import PerSiteGainChart from '../components/charts/PerSiteGainChart.svelte';
 ---
 
 <BaseLayout title="Per-Site">
@@ -8,5 +9,10 @@ import PerSiteScatter from '../components/charts/PerSiteScatter.svelte';
     <h2 data-i18n="perSite.title">逐站点差异</h2>
     <p class="convention-note">蓝点 = R_P 在该站点优于 S_AR（11/70）；灰点 = S_AR 更优</p>
     <PerSiteScatter client:load />
+  </section>
+  <section class="card">
+    <h2 data-i18n="perSite.gain">逐站点最终结果对比（对标论文 gain_by_rmse / gain_by_gap）</h2>
+    <p class="convention-note" data-i18n="perSite.gainNote">70 站点按 24h 预测 RMSE 或站点号排序；虚线 = 物理 LP 上界，点线 = dummy 零 gain；控制器可勾选</p>
+    <PerSiteGainChart client:load />
   </section>
 </BaseLayout>
