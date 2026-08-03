@@ -42,7 +42,10 @@
   const allSiteIds = $derived(siteIds);
 
   function toggle(site: number) {
-    hiddenMap = { ...hiddenMap, [site]: !hiddenMap[site] };
+    const next = { ...hiddenMap };
+    if (next[site]) delete next[site]; // restore -> remove key so counts stay correct
+    else next[site] = true;
+    hiddenMap = next;
   }
   const toggleAll = () => (hiddenMap = {});
   const clearAll = () => {
