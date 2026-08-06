@@ -14,7 +14,7 @@
   "dependencies": {
     "@astrojs/svelte": "^9.0.1",
     "astro": "^7.1.6",
-    "echarts": "^6.1.0",
+    "plotly.js-basic-dist-min": "^3.7.0",
     "svelte": "^5.56.8",
     "typescript": "^6.0.3"
   }
