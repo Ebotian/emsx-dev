@@ -88,8 +88,6 @@
         type: 'scatter',
         mode: 'lines',
         name: `SOC (${cid})`,
-        xaxis: 'x2',
-        yaxis: 'y2',
         x,
         y: steps.map((s) => s[`soc_${cid}`]),
         line: { color: seriesFor[cid] },
@@ -102,8 +100,6 @@
         type: 'scatter',
         mode: 'lines',
         name: `u (${cid})`,
-        xaxis: 'x3',
-        yaxis: 'y3',
         x,
         y: steps.map((s) => s[`u_${cid}`]),
         line: { color: seriesFor[cid], width: 1.5 },
@@ -120,33 +116,30 @@
       // verbatim on any panel (an 'x unified' box would repeat it once per trace)
       hovermode: 'closest',
       margin: { l: 56, r: 16, t: 44, b: 44 },
-      xaxis: { domain: [0.06, 0.97], showticklabels: false, matches: 'x3' },
-      xaxis2: { domain: [0.06, 0.97], showticklabels: false, matches: 'x3' },
-      xaxis3: {
-        domain: [0.06, 0.97],
+      xaxis: {
         tickmode: 'array',
         tickvals,
         ticktext: tickvals.map(fmtTime),
         rangeslider: { visible: true, thickness: 0.08 },
       },
-      yaxis: { domain: [0.72, 1], title: 'kW', range: [-100, 150] },
-      yaxis2: { domain: [0.46, 0.65], title: 'SOC', range: [0, 1] },
-      yaxis3: { domain: [0.20, 0.39], title: 'u', range: [-1, 1] },
+      // one shared y axis — load/pv/z in kW, SOC (0-1) and u (-1..1) drawn on
+      // the same scale, time-aligned on the single x axis
+      yaxis: { title: 'kW (load/pv/z) · SOC · u', autorange: true },
       shapes: cuts.map((c) => ({
         type: 'line',
         xref: 'x',
-        yref: 'y',
+        yref: 'paper',
         x0: c.min,
         x1: c.min,
-        y0: -100,
-        y1: 150,
+        y0: 0,
+        y1: 1,
         line: { color: palette.faint, dash: 'dash', width: 1 },
       })),
       annotations: cuts.map((c) => ({
         x: c.min,
-        y: 150,
+        y: 1,
         xref: 'x',
-        yref: 'y',
+        yref: 'paper',
         text: `period ${c.period}`,
         showarrow: false,
         xanchor: 'left',
@@ -165,5 +158,5 @@
   {/each}
 </select>
 {#if ready && data.length > 0}
-  <Plot {data} {layout} height={560} ariaLabel="Dispatch over 7 days: load, PV and net demand, SOC and control per controller" />
+  <Plot {data} {layout} config={{ scrollZoom: true }} height={560} ariaLabel="Dispatch over 7 days: load, PV and net demand, SOC and control per controller" />
 {/if}
