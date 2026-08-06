@@ -3,8 +3,8 @@
    *  Default shows all sites (faint family); a dropdown multi-select filters which
    *  site curves are drawn. Confidence := R2 (%) of net-demand forecast (training data). */
   import { onMount } from 'svelte';
-  import * as echarts from 'echarts';
-  import { palette, axisStyle, font } from '../../lib/palette';
+  import Plot from './Plot.svelte';
+  import { palette } from '../../lib/palette';
 
   const fmtTime = (min: number) =>
     min < 60 ? `${min}min` : min % 60 === 0 ? `${min / 60}h` : `${(min / 60).toFixed(1)}h`;
@@ -13,11 +13,12 @@
   let open = $state(false);
   let query = $state('');
   let hiddenMap = $state<Record<number, boolean>>({}); // true = hidden; empty = show all
-  let container: HTMLDivElement;
-  let chart: echarts.ECharts | undefined;
   let siteIds = $state<number[]>([]);
   let seriesBySite = $state<[number, number][][]>([]); // parallel to siteIds
   let env: { minutes: number; median: number; p5: number; p95: number }[] = [];
+
+  let data = $state<any[]>([]);
+  let layout = $state<Record<string, any>>({});
 
   onMount(async () => {
     const res = await fetch('/data/site_confidence.json', { cache: 'no-store' });
@@ -31,11 +32,7 @@
     }
     siteIds = [...m.keys()].sort((a, b) => a - b);       // whole-assign to trigger reactivity
     seriesBySite = siteIds.map((s) => m.get(s)!);
-    chart = echarts.init(container);
-    const ro = new ResizeObserver(() => chart?.resize());
-    ro.observe(container);
     ready = true;
-    return () => ro.disconnect();
   });
 
   const visibleSites = $derived(siteIds.filter((s) => !hiddenMap[s]));
@@ -55,46 +52,70 @@
   };
   const matched = $derived(allSiteIds.filter((s) => String(s).includes(query)));
 
+  const tickvals = [0, 240, 480, 720, 960, 1200, 1440];
+  const ticktext = tickvals.map(fmtTime);
+
   $effect(() => {
     if (!ready) return;
-    const opt: echarts.EChartsOption = {
-      tooltip: {
-        trigger: 'axis',
-        formatter: (params: any) => {
-          const arr = Array.isArray(params) ? params : [params];
-          const p = env[arr[0]?.dataIndex];
-          if (!p) return '';
-          return `<b>${fmtTime(p.minutes)}</b><br/>` +
-            `median confidence: ${(p.median * 100).toFixed(1)}%<br/>` +
-            `P5–P95: ${(p.p5 * 100).toFixed(1)}% – ${(p.p95 * 100).toFixed(1)}%`;
-        },
-      },
-      legend: { top: 0, data: ['P5', 'median', 'P95'], textStyle: { fontFamily: font } },
-      grid: { left: 56, right: 24, top: 32, bottom: 44 },
-      xAxis: {
-        type: 'value',
-        min: 0,
-        max: 1440,
-        axisLabel: { formatter: (v: number) => fmtTime(v), fontFamily: font },
-        ...axisStyle,
-      },
-      yAxis: { type: 'value', name: 'confidence (%)', min: 0, max: 100, ...axisStyle },
-      series: [
-        ...visibleSites.map((sid, i) => ({
+    const timeTxt = (min: number) => fmtTime(min);
+    data = [
+      ...visibleSites.map((sid) => {
+        const pts = seriesBySite[siteIds.indexOf(sid)];
+        return {
+          type: 'scatter',
+          mode: 'lines',
           name: `site ${sid}`,
-          type: 'line',
-          data: seriesBySite[siteIds.indexOf(sid)],
-          symbol: 'none',
-          silent: true,
-          lineStyle: { width: 1.2, opacity: 0.18, color: palette.paperLookahead[0] },
-          emphasis: { disabled: true },
-        })),
-        { name: 'P5', type: 'line', data: env.map((p) => [p.minutes, p.p5 * 100]), symbol: 'none', lineStyle: { type: 'dashed', color: palette.faint } },
-        { name: 'median', type: 'line', data: env.map((p) => [p.minutes, p.median * 100]), symbol: 'none', lineStyle: { width: 2.5, color: palette.accent } },
-        { name: 'P95', type: 'line', data: env.map((p) => [p.minutes, p.p95 * 100]), symbol: 'none', lineStyle: { type: 'dashed', color: palette.faint } },
-      ],
+          x: pts.map((p) => p[0]),
+          y: pts.map((p) => p[1]),
+          line: { color: palette.paperLookahead[0], width: 1.2 },
+          opacity: 0.18,
+          hoverinfo: 'skip',
+          showlegend: false,
+        };
+      }),
+      {
+        type: 'scatter',
+        mode: 'lines',
+        name: 'P5',
+        x: env.map((p) => p.minutes),
+        y: env.map((p) => p.p5 * 100),
+        line: { color: palette.faint, dash: 'dash' },
+        customdata: env.map((p) => [timeTxt(p.minutes)]),
+        hovertemplate: '<b>%{customdata[0]}</b><br/>P5: %{y:.1f}%<extra></extra>',
+        legendrank: 1,
+      },
+      {
+        type: 'scatter',
+        mode: 'lines',
+        name: 'P95',
+        x: env.map((p) => p.minutes),
+        y: env.map((p) => p.p95 * 100),
+        line: { color: palette.faint, dash: 'dash' },
+        fill: 'tonexty', // band between P95 and the preceding P5 trace
+        fillcolor: 'rgba(156,163,175,0.15)',
+        customdata: env.map((p) => [timeTxt(p.minutes)]),
+        hovertemplate: 'P95: %{y:.1f}%<extra></extra>',
+        legendrank: 3,
+      },
+      {
+        type: 'scatter',
+        mode: 'lines',
+        name: 'median',
+        x: env.map((p) => p.minutes),
+        y: env.map((p) => p.median * 100),
+        line: { color: palette.accent, width: 2.5 },
+        customdata: env.map((p) => [timeTxt(p.minutes)]),
+        hovertemplate: 'median confidence: %{y:.1f}%<extra></extra>',
+        legendrank: 2,
+      },
+    ];
+    layout = {
+      legend: { orientation: 'h', x: 0, y: 1.12 },
+      hovermode: 'x unified',
+      margin: { l: 56, r: 24, t: 44, b: 48 },
+      xaxis: { title: 'forecast time →', range: [0, 1440], tickvals, ticktext },
+      yaxis: { title: 'confidence (%)', range: [0, 100] },
     };
-    chart?.setOption(opt, { notMerge: true });
   });
 </script>
 
@@ -128,4 +149,6 @@
     </div>
   {/if}
 </div>
-<div bind:this={container} style="width:100%;height:400px;"></div>
+{#if ready && data.length > 0}
+  <Plot {data} {layout} height={400} ariaLabel="Forecast confidence per site over the 24h forecast horizon, with median and P5-P95 envelope" />
+{/if}

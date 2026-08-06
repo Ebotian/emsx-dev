@@ -10,7 +10,7 @@ TRAIN = os.path.join(ROOT, "dataset", "train")
 OUT = os.path.join(os.path.dirname(__file__), "..", "..", "public", "data", "site_confidence.json")
 
 H = 96
-STEP = 2                       # sample every 2 horizons (30 min)
+STEP = 1                        # every horizon (15 min) — full granularity
 HORIZONS = list(range(1, H + 1, STEP))
 HORIZONS[-1] = H               # last sample is exactly 24h
 
