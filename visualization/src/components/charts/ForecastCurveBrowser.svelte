@@ -81,9 +81,12 @@
     singleReady = true;
   });
 
-  const singleData = $derived(buildData(selected));
-  const singleLayout = $derived(buildLayout());
-</script>
+  let singleData = $state<any[]>([]);
+  let singleLayout = $state<Record<string, any>>({});
+  $effect(() => {
+    singleData = buildData(selected);
+    singleLayout = buildLayout();
+  });</script>
 
 <div style="font-size:13px;color:#6b7280;margin-bottom:8px;">
   默认对照：最优调度 33/59（score 0.981 / 0.932）与最差调度 9/3（score 0.377 / 0.449）

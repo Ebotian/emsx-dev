@@ -45,6 +45,12 @@
   });
 
   $effect(() => {
+    // Property access (not bare variable refs) compiles to prop-signal calls,
+    // which is what registers the reactive dependency in Svelte 5. Without it,
+    // `copy(data)` compiles to raw `$$props.data` reads and prop changes never
+    // re-trigger this effect (Plotly.react then never runs with new data).
+    void data?.length;
+    void layout?.xaxis;
     if (!initialized || !Plotly) return;
     Plotly.react(container, copy(data), copy(layout), fullConfig());
   });
