@@ -46,7 +46,7 @@
       },
     ];
     layout = {
-      yaxis: { title: 'RMSE (kWh)' },
+      yaxis: { title: 'RMSE (kWh, log)', type: 'log', tickformat: '.1f' },
       xaxis: {
         type: 'category',
         categoryorder: 'trace',
