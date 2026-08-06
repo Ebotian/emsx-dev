@@ -51,3 +51,4 @@ external_data/aemo/validation/
 # Ausgrid dataset artifacts (binary, not versioned)
 external_data/ausgrid/*.pdf
 external_data/ausgrid/*.ZIP
+external_data/aemo/validation48/

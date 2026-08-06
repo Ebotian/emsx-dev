@@ -15,6 +15,7 @@ using StoOpt
 using ControlVariables
 using CSV, DataFrames, Statistics, JSON, LinearAlgebra
 using Interpolations
+using Dates
 
 const DATASET_DIR = ARGS[1]
 const N_SLOTS = parse(Int, ARGS[2])
@@ -23,7 +24,7 @@ const K_NOISE = 20
 const NZ = 20
 const DX = 0.1
 const DU = 0.1
-const MAX_VI_ITERS = 3
+const MAX_VI_ITERS = 30
 const VI_TOL = 1e-3
 const MARGIN = 0.5
 const CURVE_WINDOW = 2 * N_SLOTS  # 2 days for dispatch-forecast curves
@@ -32,6 +33,20 @@ SITE_IDS = isempty(ARGS[3:end]) ? sort(readdir(DATASET_DIR)) : ARGS[3:end]
 SITE_IDS = filter(s -> isdir(joinpath(DATASET_DIR, s)) && s != "results", SITE_IDS)
 
 mkpath(joinpath(DATASET_DIR, "results"))
+
+# ---------------------------------------------------------------------------
+# Real-time-of-week slot index: timestamps -> 1..HORIZON (Mon 00:00 = 1),
+# aligned to the actual calendar so the per-slot tariff/AR(1) pattern is
+# evaluated at the correct day-of-week and time-of-day for BOTH train and
+# test (position-based indexing silently misaligns when test starts on a
+# different weekday than train).
+# ---------------------------------------------------------------------------
+function week_slot(ts::AbstractString, n_slots::Int)
+    dt = DateTime(ts[1:19], dateformat"yyyy-mm-ddTHH:MM:SS")
+    slot_of_day = round(Int, (Dates.hour(dt) * 60 + Dates.minute(dt)) / (60 * 24) * n_slots) + 1
+    return (Dates.dayofweek(dt) - 1) * n_slots + slot_of_day
+end
+week_slot(ts::Date, n_slots::Int) = week_slot(string(ts), n_slots)
 
 # ---------------------------------------------------------------------------
 # Deterministic 1D DP optimal quantization (same as wdwe2 A1)
@@ -93,32 +108,26 @@ end
 function fit_ar1(train_df::DataFrame)
     z = Float64.(train_df.z)
     n = length(z)
-    n_weeks = n ÷ HORIZON
-    n_weeks < 1 && error("need >= 1 week of training data")
-    zmat = collect(reshape(z[1:n_weeks * HORIZON], HORIZON, n_weeks)')
-    is_weekend = falses(HORIZON)
-    for t in 1:HORIZON
-        day = ((t - 1) ÷ N_SLOTS) + 1
-        is_weekend[t] = day >= 6
-    end
+    n < HORIZON && error("need >= HORIZON training samples")
+    tau = [week_slot(string(ts), N_SLOTS) for ts in train_df.timestamp]
     alpha = zeros(HORIZON); beta = zeros(HORIZON)
     support = zeros(K_NOISE, HORIZON); probability = zeros(K_NOISE, HORIZON)
+    # collect all consecutive pairs (z[i-1] -> z[i]); each pair belongs to the
+    # real-time-of-week slot of its target index i. Uses ALL training days (not
+    # just whole weeks) so short datasets (e.g. 14-day AEMO) get max samples.
     for t in 1:HORIZON
         q = ((t - 1) % N_SLOTS) + 1
-        we = is_weekend[t]
+        we = ((t - 1) ÷ N_SLOTS) + 1 >= 6
         xs = Float64[]; ys = Float64[]
-        for w in 1:n_weeks
-            for tt in 1:HORIZON
-                if ((tt - 1) % N_SLOTS) + 1 == q && is_weekend[tt] == we
-                    if tt == 1
-                        push!(xs, zmat[w, HORIZON]); push!(ys, zmat[w, 1])
-                    else
-                        push!(xs, zmat[w, tt-1]); push!(ys, zmat[w, tt])
-                    end
-                end
+        for i in 2:n
+            τi = tau[i]
+            iq = ((τi - 1) % N_SLOTS) + 1
+            iwe = ((τi - 1) ÷ N_SLOTS) + 1 >= 6
+            if iq == q && iwe == we
+                push!(xs, z[i-1]); push!(ys, z[i])
             end
         end
-        length(xs) >= 5 || continue
+        length(xs) >= 2 || continue
         X = hcat(xs, ones(length(xs)))
         w_reg = pinv(X' * X) * X' * ys
         alpha[t] = w_reg[1]; beta[t] = w_reg[2]
@@ -129,6 +138,17 @@ function fit_ar1(train_df::DataFrame)
                 support[i, t] = supp[i]; probability[i, t] = pr[i]
             else
                 support[i, t] = supp[end]; probability[i, t] = 0.0
+            end
+        end
+    end
+    # fallback: any slot whose group was skipped (too few samples) gets a
+    # deterministic zero-noise kernel so every transition row sums to 1.
+    for t in 1:HORIZON
+        if sum(probability[:, t]) == 0.0
+            probability[1, t] = 1.0
+            support[1, t] = 0.0
+            for i in 2:K_NOISE
+                support[i, t] = 0.0
             end
         end
     end
@@ -176,6 +196,7 @@ function replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, ctrl, bu
     z = Float64.(test_df.z)
     buy = Float64.(test_df.price_buy)
     sell = Float64.(test_df.price_sell)
+    tau_te = [week_slot(string(ts), N_SLOTS) for ts in test_df.timestamp]
     n = length(z)
     soc = 0.0
     cost_total = 0.0
@@ -186,7 +207,7 @@ function replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, ctrl, bu
     # pre-build interpolators once per horizon slot (per-step construction is slow)
     itps = [linear_interpolation((soc_axis, z_axis), vf_arr[τ + 1, :, :]; extrapolation_bc=Line()) for τ in 1:HORIZON]
     for t in 1:n
-        τ = ((t - 1) % HORIZON) + 1
+        τ = tau_te[t]
         z_t = clamp(z[t], z_min, z_max)
         if ctrl === :dummy
             u = 0.0
@@ -216,7 +237,12 @@ function replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, ctrl, bu
                      min((1.0 - soc) * capacity / (eta_c * power * dt), 1.0))
         soc_new = soc + (eta_c * max(0.0, u) - max(0.0, -u) / eta_d) * power * dt / capacity
         import_kwh = z_t + u * power * dt
-        c = buy[t] * max(0.0, import_kwh) - sell[t] * max(0.0, -import_kwh)
+        # replayed cost uses the per-slot tariff (train-mean prices), the same
+        # schedule the controller was optimized against — structurally parallel
+        # to Ausgrid's fixed TOU tariff (train == test prices there). Using raw
+        # market prices here would let window-to-window price drift dominate the
+        # result (invalid for short datasets like 14-day AEMO).
+        c = buy_slot[τ] * max(0.0, import_kwh) - sell_slot[τ] * max(0.0, -import_kwh)
         cost_total += c
         soc = soc_new
         u_seq[t] = u; soc_seq[t] = soc; cost_seq[t] = c
@@ -247,12 +273,22 @@ for site in SITE_IDS
         scale = power * dt / capacity
 
         # offline cost/dynamics: per-slot average buy/sell price over train
+        # (real-time-of-week slot alignment, matching fit_ar1)
         buy_vec = Float64.(train_df.price_buy)
         sell_vec = Float64.(train_df.price_sell)
         n_train = length(buy_vec)
-        n_wk = n_train ÷ HORIZON
-        buy_by_slot = vec(mean(reshape(buy_vec[1:n_wk*HORIZON], HORIZON, n_wk), dims=2))
-        sell_by_slot = vec(mean(reshape(sell_vec[1:n_wk*HORIZON], HORIZON, n_wk), dims=2))
+        tau_tr = [week_slot(string(ts), N_SLOTS) for ts in train_df.timestamp]
+        buy_by_slot = zeros(HORIZON); sell_by_slot = zeros(HORIZON)
+        cnt_slot = zeros(Int, HORIZON)
+        for i in 1:n_train
+            buy_by_slot[tau_tr[i]] += buy_vec[i]; sell_by_slot[tau_tr[i]] += sell_vec[i]
+            cnt_slot[tau_tr[i]] += 1
+        end
+        for t in 1:HORIZON
+            if cnt_slot[t] > 0
+                buy_by_slot[t] /= cnt_slot[t]; sell_by_slot[t] /= cnt_slot[t]
+            end
+        end
 
         function offline_cost(t::Int, state::Vector{Float64}, control::Vector{Float64}, noise::Vector{Float64})
             z_pred = alpha[t] * state[2] + beta[t] + noise[1]
@@ -282,8 +318,9 @@ for site in SITE_IDS
         actual = Float64.(test_df.z[1:w+1])
         ar1 = Float64[]
         persist = Float64[]
+        tau_te2 = [week_slot(string(ts), N_SLOTS) for ts in test_df.timestamp]
         for t in 1:w
-            τ = ((t - 1) % HORIZON) + 1
+            τ = tau_te2[t]
             z_t = clamp(actual[t], z_min, z_max)
             push!(ar1, alpha[τ] * z_t + beta[τ])
             push!(persist, actual[t])

@@ -36,7 +36,7 @@ scp -r validation kevin@192.168.10.147:~/emsx-experiment/external/aemo/
 echo "validation synced to Mac"
 
 # 5) launch 5 regions in parallel on Mac (288 slots = 5min)
-ssh kevin@192.168.10.147 'cd ~/emsx-experiment && mkdir -p external/aemo/results && for r in NSW1 VIC1 QLD1 SA1 TAS1; do nohup /opt/homebrew/bin/julia --project=$HOME/emsx-experiment run_external_validation.jl external/aemo/validation 288 $r > external/aemo_run_$r.log 2>&1 & done; echo "launched 5 regions"; sleep 2; ps aux | grep -c "[r]un_external_validation"' | tail -3
+ssh kevin@192.168.10.147 'cd ~/emsx-experiment && mkdir -p external/aemo/results && for r in NSW1 VIC1 QLD1 SA1 TAS1; do nohup /opt/homebrew/bin/julia --project=$HOME/emsx-experiment external/run_external_validation.jl external/aemo/validation 288 $r > external/aemo_run_$r.log 2>&1 & done; echo "launched 5 regions"; sleep 2; ps aux | grep -c "[r]un_external_validation"' | tail -3
 
 # 6) wait for 5 result files
 for i in $(seq 1 240); do
@@ -56,6 +56,6 @@ ssh kevin@192.168.10.147 'tail -2 ~/emsx-experiment/external/aemo_run_NSW1.log ~
 
 # 8) aggregate to visualization JSON
 cd /home/ebt/Downloads/emsx/external_data
-python3 aggregate_results.py aemo ../../visualization/public/data/aemo
+python3 aggregate_results.py aemo ../visualization/public/data/aemo
 
 echo "PIPELINE DONE"
