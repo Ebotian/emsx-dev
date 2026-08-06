@@ -39,3 +39,11 @@ __pycache__/
 .DS_Store
 *.swp
 *~
+
+# External dataset raw/intermediate data (large, not versioned)
+external_data/ausgrid/validation/
+external_data/ausgrid/processed/
+external_data/ausgrid/*.csv
+external_data/ausgrid/*.zip
+external_data/aemo/raw/
+external_data/aemo/validation/

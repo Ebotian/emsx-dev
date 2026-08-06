@@ -8,11 +8,11 @@ import ExternalCurveBrowser from '../components/charts/ExternalCurveBrowser.svel
   <section class="card">
     <h2 data-i18n="ausgrid.title">Ausgrid 数据集验证</h2>
     <p class="convention-note" data-i18n="ausgrid.note">300 户澳洲家庭（30min 净需求，2010-07~2013-06）；S_AR / R_P 相对 dummy 的 gain；TOU 电价、物理 SOC 回放</p>
-    <ExternalGainChart dataUrl="/data/ausgrid/per_site_gain.json" />
+    <ExternalGainChart client:load dataUrl="/data/ausgrid/per_site_gain.json" />
   </section>
   <section class="card">
     <h2 data-i18n="ausgrid.curves">调度-预测曲线</h2>
     <p class="convention-note" data-i18n="ausgrid.curvesNote">每站点测试期窗口的实际净需求、AR(1) 一步预测与 persistence；站点可切换</p>
-    <ExternalCurveBrowser dataUrl="/data/ausgrid/curves.json" label="Ausgrid" />
+    <ExternalCurveBrowser client:load dataUrl="/data/ausgrid/curves.json" label="Ausgrid" />
   </section>
 </BaseLayout>

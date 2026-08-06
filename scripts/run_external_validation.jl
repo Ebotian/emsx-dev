@@ -29,7 +29,7 @@ const MARGIN = 0.5
 const CURVE_WINDOW = 2 * N_SLOTS  # 2 days for dispatch-forecast curves
 
 SITE_IDS = isempty(ARGS[3:end]) ? sort(readdir(DATASET_DIR)) : ARGS[3:end]
-SITE_IDS = filter(s -> isdir(joinpath(DATASET_DIR, s)), SITE_IDS)
+SITE_IDS = filter(s -> isdir(joinpath(DATASET_DIR, s)) && s != "results", SITE_IDS)
 
 mkpath(joinpath(DATASET_DIR, "results"))
 
@@ -289,22 +289,22 @@ for site in SITE_IDS
             push!(persist, actual[t])
         end
 
-        push!(results, Dict(
+        r = Dict(
             "site" => site,
             "cost" => Dict("dummy" => round(c_dummy; digits=2), "rp" => round(c_rp; digits=2), "sdp" => round(c_sdp; digits=2)),
             "gain" => Dict("rp" => round(c_dummy - c_rp; digits=2), "sdp" => round(c_dummy - c_sdp; digits=2)),
             "curves" => Dict("actual" => round.(actual, digits=3), "ar1" => round.(ar1, digits=3), "persist" => round.(persist, digits=3)),
-        ))
-        println("site $site: dummy=$(round(c_dummy; digits=1)) rp=$(round(c_rp; digits=1)) sdp=$(round(c_sdp; digits=1)) gain_sdp=$(round(c_dummy-c_sdp; digits=1))")
+        )
+        open(joinpath(DATASET_DIR, "results", "$site.json"), "w") do io
+            JSON.print(io, r)
+        end
+        flush(stdout); println("site $site: dummy=$(round(c_dummy; digits=1)) rp=$(round(c_rp; digits=1)) sdp=$(round(c_sdp; digits=1)) gain_sdp=$(round(c_dummy-c_sdp; digits=1))")
     catch e
         println("site $site FAILED: ", sprint(showerror, e))
-        push!(results, Dict("site" => site, "error" => sprint(showerror, e)))
+        open(joinpath(DATASET_DIR, "results", "$site.json"), "w") do io
+            JSON.print(io, Dict("site" => site, "error" => sprint(showerror, e)))
+        end
     end
 end
 
-for r in results
-    open(joinpath(DATASET_DIR, "results", "$(r["site"]).json"), "w") do io
-        JSON.print(io, r)
-    end
-end
 println("done: $(length(results)) sites -> $(joinpath(DATASET_DIR, "results"))")
