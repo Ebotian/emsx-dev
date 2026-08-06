@@ -52,7 +52,7 @@
         x,
         y: r.cum,
         line: { color: r.color },
-        hovertemplate: `<b>step %{x}</b><br/>${r.name} cumulative cost: %{y:.1f}<extra></extra>`,
+        hovertemplate: `<b>step %{x}</b><br>${r.name} cumulative cost: %{y:.1f}<extra></extra>`,
       })),
       ...rows.map((r) => ({
         name: `${r.name} SOC`,
@@ -62,7 +62,7 @@
         y: r.soc,
         yaxis: 'y2',
         line: { color: r.color, dash: 'dash' },
-        hovertemplate: `<b>step %{x}</b><br/>${r.name} SOC: %{y:.3f}<extra></extra>`,
+        hovertemplate: `<b>step %{x}</b><br>${r.name} SOC: %{y:.3f}<extra></extra>`,
       })),
     ];
     layout = {

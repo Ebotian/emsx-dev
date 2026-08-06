@@ -46,9 +46,9 @@
     // energy-balance tooltip: same text as the original formatter, carried
     // in customdata so every panel (and every trace) shows the full balance box.
     const tt = (s: any) =>
-      `<b>t=${s.t} (${fmtTime(s.t * 15)}), period ${s.period}</b><br/>` +
-      `load=${s.load.toFixed(1)}  pv=${s.pv.toFixed(1)}  z=${s.z.toFixed(1)}<br/>` +
-      `SOC=${s[`soc_${cid}`].toFixed(3)}  u(${cid})=${s[`u_${cid}`].toFixed(3)}<br/>` +
+      `<b>t=${s.t} (${fmtTime(s.t * 15)}), period ${s.period}</b><br>` +
+      `load=${s.load.toFixed(1)}  pv=${s.pv.toFixed(1)}  z=${s.z.toFixed(1)}<br>` +
+      `SOC=${s[`soc_${cid}`].toFixed(3)}  u(${cid})=${s[`u_${cid}`].toFixed(3)}<br>` +
       `import = z + u·P·Δt = ${(s.z + (s[`u_${cid}`] ?? 0) * P * 0.25).toFixed(1)} kWh`;
     const fullTpl = '<b>%{customdata[0]}</b><extra></extra>';
     const cd = steps.map((s) => [tt(s)]);

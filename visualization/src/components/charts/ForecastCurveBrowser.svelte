@@ -32,7 +32,7 @@
         x: steps,
         y: c.actual,
         line: { color: palette.ink, width: 1.5 },
-        hovertemplate: '<b>step %{x}</b><br/>actual z: %{y:.2f} kW<extra></extra>',
+        hovertemplate: '<b>step %{x}</b><br>actual z: %{y:.2f} kW<extra></extra>',
       },
       {
         type: 'scatter',

@@ -42,7 +42,7 @@
         textposition: 'outside',
         cliponaxis: false,
         textfont: { size: 11 },
-        hovertemplate: '<b>%{x}</b><br/>score: %{y:.3f}<extra></extra>',
+        hovertemplate: '<b>%{x}</b><br>score: %{y:.3f}<extra></extra>',
       },
       ...(rows.some((r) => r.paper !== undefined)
         ? [
@@ -53,7 +53,7 @@
               x: rows.filter((r) => r.paper !== undefined).map((r) => r.id),
               y: rows.filter((r) => r.paper !== undefined).map((r) => r.paper),
               marker: { color: palette.faint, size: 6 },
-              hovertemplate: '<b>%{x}</b><br/>paper: %{y:.3f}<extra></extra>',
+              hovertemplate: '<b>%{x}</b><br>paper: %{y:.3f}<extra></extra>',
             },
           ]
         : []),

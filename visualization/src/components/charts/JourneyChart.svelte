@@ -33,7 +33,7 @@
         text: journey.map((s) => s.score.toFixed(2)),
         textposition: 'outside',
         textfont: { size: 11 },
-        hovertemplate: '<b>%{x}</b><br/>score: %{y:.2f}<extra></extra>',
+        hovertemplate: '<b>%{x}</b><br>score: %{y:.2f}<extra></extra>',
       },
     ];
     layout = {

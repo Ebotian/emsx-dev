@@ -55,7 +55,7 @@
           r.delta < 0 ? 'R_P cheaper' : r.delta > 0 ? 'S_AR cheaper' : 'equal',
         ]),
         hovertemplate:
-          '<b>site %{customdata[0]}</b><br/>S_AR cost: %{customdata[1]}<br/>R_P cost: %{customdata[2]}<br/>Δ (R_P−S_AR): <b>%{customdata[3]}</b> — %{customdata[4]}<extra></extra>',
+          '<b>site %{customdata[0]}</b><br>S_AR cost: %{customdata[1]}<br>R_P cost: %{customdata[2]}<br>Δ (R_P−S_AR): <b>%{customdata[3]}</b> — %{customdata[4]}<extra></extra>',
       },
       {
         type: 'scatter',

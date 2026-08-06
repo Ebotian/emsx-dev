@@ -43,7 +43,7 @@
     const xs = order.map((r, i) => (byRmse ? i + 1 : `#${r.site}`));
     const cd = (r: Row, i: number) => [r.site, i + 1, r.rmse96, r.dummy_cost];
     const headTpl =
-      '<b>site %{customdata[0]}</b> (rank %{customdata[1]}, 24h RMSE %{customdata[2]:.1f}, dummy %{customdata[3]:.0f})<br/>%{fullData.name}: %{y:.1f}<extra></extra>';
+      '<b>site %{customdata[0]}</b> (rank %{customdata[1]}, 24h RMSE %{customdata[2]:.1f}, dummy %{customdata[3]:.0f})<br>%{fullData.name}: %{y:.1f}<extra></extra>';
     const lineTpl = '%{fullData.name}: %{y:.1f}<extra></extra>';
 
     const traces: any[] = [];

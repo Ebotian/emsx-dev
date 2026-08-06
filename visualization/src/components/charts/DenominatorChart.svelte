@@ -26,7 +26,7 @@
         y: sorted.map(([, y]) => y),
         width: 45,
         marker: { color: palette.accent },
-        hovertemplate: '<b>D = %{x:.0f}</b><br/>count: %{y}<extra></extra>',
+        hovertemplate: '<b>D = %{x:.0f}</b><br>count: %{y}<extra></extra>',
       },
     ];
     layout = {

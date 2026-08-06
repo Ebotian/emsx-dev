@@ -20,7 +20,7 @@
         x: dr2,
         y: ds,
         marker: { color: palette.faint, size: 6 },
-        hovertemplate: '<b>δR²</b>: %{x:.4f}<br/>δS: %{y:.4f}<extra></extra>',
+        hovertemplate: '<b>δR²</b>: %{x:.4f}<br>δS: %{y:.4f}<extra></extra>',
       },
     ];
     layout = {

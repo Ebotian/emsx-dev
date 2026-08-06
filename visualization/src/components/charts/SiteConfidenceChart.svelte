@@ -81,7 +81,7 @@
         y: env.map((p) => p.p5 * 100),
         line: { color: palette.faint, dash: 'dash' },
         customdata: env.map((p) => [timeTxt(p.minutes)]),
-        hovertemplate: '<b>%{customdata[0]}</b><br/>P5: %{y:.1f}%<extra></extra>',
+        hovertemplate: '<b>%{customdata[0]}</b><br>P5: %{y:.1f}%<extra></extra>',
         legendrank: 1,
       },
       {
