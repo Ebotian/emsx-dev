@@ -37,7 +37,7 @@
       },
     ];
     layout = {
-      xaxis: { showticklabels: true },
+      xaxis: { type: 'category', categoryorder: 'trace', showticklabels: true },
       yaxis: { title: 'score', range: [0, 1] },
       hovermode: 'closest',
       bargap: 0.3,
