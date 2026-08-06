@@ -50,7 +50,7 @@
     "ctrlCompare": "Controller one-step forecast comparison (test set, out-of-sample)",
     "ctrlCompareNote": "S_AR's actual 1-step forecast (AR(1) conditional mean) vs dataset forecast (k=1) vs persistence; aligned pairing, AR(1) fitted on training data. AR(1) wins on 54/70 sites; on worst-scheduling sites 9/3 the SE forecast is better — forecast quality and scheduling performance are not simply causal. #62 is the only large net-export PV site, an RMSE scale outlier",
     "curves": "Scheduling-forecast curve browser",
-    "curvesNote": "All 70 sites available; default compares best-scheduling (33/59) vs worst-scheduling (9/3). Correlation, not causation"
+    "curvesNote": "All 70 sites available; default compares best-scheduling (33/59) vs worst-scheduling (9/3). Correlation, not causation. Window caveat: each site's curves come from the 2nd–3rd day (rows 97–288, 192 steps = 48h) of its own first test period; period start dates differ across sites, so cross-site comparison is structural (same relative window), not the same calendar dates"
   },
   "journey": {
     "exploit": "exploit parity (0.9973)",

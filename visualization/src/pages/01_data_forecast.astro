@@ -24,7 +24,7 @@ import ForecastCurveBrowser from '../components/charts/ForecastCurveBrowser.svel
   </section>
   <section class="card">
     <h2 data-i18n="forecast.curves">调度-预测曲线浏览器</h2>
-    <p class="convention-note" data-i18n="forecast.curvesNote">覆盖全部 70 站点；默认对照最优调度（33/59）与最差调度（9/3）。展示调度表现与预测形态的相关性，非因果</p>
+    <p class="convention-note" data-i18n="forecast.curvesNote">覆盖全部 70 站点；默认对照最优调度（33/59）与最差调度（9/3）。展示调度表现与预测形态的相关性，非因果。窗口限制：每站点曲线取各自测试数据第一个周期（period）的第 2–3 天（行 97–288，共 192 步 = 48h）；各站点周期起始日期不同，跨站点比较的是相对时间结构，而非同一日历日期</p>
     <ForecastCurveBrowser client:load />
   </section>
 </BaseLayout>
