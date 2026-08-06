@@ -14,7 +14,7 @@ import ForecastCurveBrowser from '../components/charts/ForecastCurveBrowser.svel
   </section>
   <section class="card">
     <h2 data-i18n="forecast.siteRmse">逐站点 24h 预测 RMSE</h2>
-    <p class="convention-note" data-i18n="forecast.siteRmseNote">70 站点按 24h-ahead 净需求预测 RMSE 升序；15min-ahead 为参照。绝对尺度（未做论文 min-max 归一化），与论文 Figure 3 的归一化可预测性排序方向一致但数值不可直接对标</p>
+    <p class="convention-note" data-i18n="forecast.siteRmseNote">RMSE = 预测误差（预测净需求 − 实际净需求）的均方根，单位 kWh（15 分钟步长）；数值越大表示该站点 24h-ahead 预测的平均偏差越大、越难预测。70 站点按 24h-ahead 净需求预测 RMSE 升序（纵轴对数）；15min-ahead 为参照。绝对尺度（未做论文 min-max 归一化），与论文 Figure 3 的归一化可预测性排序方向一致但数值不可直接对标</p>
     <SiteRMSEChart client:load />
   </section>
   <section class="card">

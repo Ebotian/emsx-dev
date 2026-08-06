@@ -46,7 +46,7 @@
     "confidenceFamily": "逐站点可预测性曲线族（R²，%）",
     "confidenceFamilyNote": "R² = 预测相对“恒用均值”的误差改进比，衡量数据可预测性/解释力，不是置信度；70 站点训练期、数据集 forecast",
     "siteRmse": "逐站点 24h 预测 RMSE",
-    "siteRmseNote": "70 站点按 24h-ahead 净需求预测 RMSE 升序；15min-ahead 为参照。绝对尺度（未做论文 min-max 归一化），与论文 Figure 3 的归一化可预测性排序方向一致但数值不可直接对标",
+    "siteRmseNote": "RMSE = 预测误差（预测净需求 − 实际净需求）的均方根，单位 kWh（15 分钟步长）；数值越大表示该站点 24h-ahead 预测的平均偏差越大、越难预测。70 站点按 24h-ahead 净需求预测 RMSE 升序（纵轴对数）；15min-ahead 为参照。绝对尺度（未做论文 min-max 归一化），与论文 Figure 3 的归一化可预测性排序方向一致但数值不可直接对标",
     "ctrlCompare": "控制器一步预测对比（测试期，out-of-sample）",
     "ctrlCompareNote": "横轴 = 数据集 forecast(k=1) 的一步预测 RMSE（测试期，对数刻度）；纵轴 = 控制器预测的 RMSE（对数刻度），AR(1)（S_AR 实际使用）与 persistence 两条散点。虚线 y=x 为等误差线：点在对角线上方 = 数据集 forecast 更准，下方 = 控制器预测更准（越靠右下误差越大）。AR(1) 在 54/70 站点优于数据集 forecast；最差调度站点 9/3 上 SE forecast 反而更准——预测质量与调度表现非简单因果。#62 为唯一大型净出口 PV 站，RMSE 尺度离群",
     "curves": "调度-预测曲线浏览器",
