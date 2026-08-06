@@ -20,7 +20,7 @@
   },
   "aemo": {
     "title": "AEMO Dataset Validation",
-    "note": "NEM 5 regions (5-min net demand + prices); S_AR / R_P gain over dummy; TOU spread, physical SOC replay",
+    "note": "NEM 5 regions; original 5-min data resampled to 30 min (14 days, below the 6-month standard — degraded demo); region-typical tariff pricing; S_AR / R_P gain over dummy",
     "curves": "Dispatch-forecast curves",
     "curvesNote": "Actual net demand, AR(1) 1-step prediction and persistence over each region's test window; region switchable"
   },
