@@ -38,9 +38,8 @@
     ]);
     const tpl =
       '<b>site %{customdata[0]}</b> (n=%{customdata[1]})<br>' +
-      'AR(1):      rmse %{customdata[2]} · r² %{customdata[3]}<br>' +
-      'SE(k=1):    rmse %{customdata[4]} · r² %{customdata[5]}<br>' +
-      'persistence rmse %{customdata[6]} · r² %{customdata[7]}<extra></extra>';
+      '%{fullData.name}: rmse %{y:.1f}<br>' +
+      'SE(k=1) reference: rmse %{customdata[4]} · r² %{customdata[5]}<extra></extra>';
 
     traces = [
       {
