@@ -1,30 +1,42 @@
 <script lang="ts">
   /** 08: persistence attribution — delta R2 vs delta S, negative evidence. */
   import { onMount } from 'svelte';
-  import * as echarts from 'echarts';
-  import { palette, axisStyle, font } from '../../lib/palette';
+  import Plot from './Plot.svelte';
+  import { palette } from '../../lib/palette';
 
-  let container: HTMLDivElement;
-  let chart: echarts.ECharts | undefined;
+  let traces = $state<any[]>([]);
+  let layout = $state<Record<string, any>>({});
+  let ready = $state(false);
 
   onMount(async () => {
     const res = await fetch('/data/sensitivity.json', { cache: 'no-store' });
     const d = await res.json();
-    chart = echarts.init(container);
-    const pts = d.persist.dr2.map((x: number, i: number) => [x, d.persist.ds[i]]);
-    const opt: echarts.EChartsOption = {
-      title: { text: `corr(δR², δS) = ${d.persist.corr} — no support for the persistence hypothesis`, left: 'center', textStyle: { fontSize: 13 } },
-      tooltip: { trigger: 'item' },
-      grid: { left: 56, right: 24, top: 40, bottom: 44 },
-      xAxis: { type: 'value', name: 'δR² (AR − persistence)', ...axisStyle },
-      yAxis: { type: 'value', name: 'δS (R_P − S_AR)', ...axisStyle },
-      series: [{ type: 'scatter', data: pts, symbolSize: 6, itemStyle: { color: palette.faint } }],
+    const dr2: number[] = d.persist.dr2;
+    const ds: number[] = d.persist.ds;
+    traces = [
+      {
+        type: 'scatter',
+        mode: 'markers',
+        x: dr2,
+        y: ds,
+        marker: { color: palette.faint, size: 6 },
+        hovertemplate: '<b>δR²</b>: %{x:.4f}<br/>δS: %{y:.4f}<extra></extra>',
+      },
+    ];
+    layout = {
+      title: {
+        text: `corr(δR², δS) = ${d.persist.corr} — no support for the persistence hypothesis`,
+        font: { size: 13 },
+      },
+      xaxis: { title: 'δR² (AR − persistence)' },
+      yaxis: { title: 'δS (R_P − S_AR)' },
+      hovermode: 'closest',
+      margin: { l: 56, r: 24, t: 44, b: 44 },
     };
-    chart.setOption(opt);
-    const ro = new ResizeObserver(() => chart?.resize());
-    ro.observe(container);
-    return () => ro.disconnect();
+    ready = true;
   });
 </script>
 
-<div bind:this={container} style="width:100%;height:380px;"></div>
+{#if ready}
+  <Plot data={traces} {layout} height={380} ariaLabel="Persistence attribution: delta R2 vs delta S scatter" />
+{/if}

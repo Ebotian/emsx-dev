@@ -15,7 +15,11 @@ const cache = new Map<string, Promise<unknown>>();
 function cached<T>(path: string): Promise<T> {
   let p = cache.get(path) as Promise<T> | undefined;
   if (!p) {
-    p = load<T>(path);
+    // do not cache failures — a rejected promise would poison every later load
+    p = load<T>(path).catch((e) => {
+      cache.delete(path);
+      throw e;
+    });
     cache.set(path, p);
   }
   return p;

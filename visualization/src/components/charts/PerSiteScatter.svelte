@@ -3,9 +3,9 @@
    *  Raw costs differ by only ~0.3% on average, so a cost-vs-cost scatter collapses
    *  onto the diagonal; plotting the per-site difference restores resolution. */
   import { onMount } from 'svelte';
-  import * as echarts from 'echarts';
+  import Plot from './Plot.svelte';
   import { data } from '../../lib/data';
-  import { palette, axisStyle, font } from '../../lib/palette';
+  import { palette } from '../../lib/palette';
   import { useI18n } from '../../lib/useI18n';
 
   const i18n = useI18n();
@@ -15,9 +15,10 @@
 
   let ready = $state(false);
   let sortBy = $state<'delta' | 'site'>('delta');
-  let container: HTMLDivElement;
-  let chart: echarts.ECharts | undefined;
   let rows: { site: number; sAr: number; rP: number; delta: number }[] = [];
+
+  let traces = $state<any[]>([]);
+  let layout = $state<Record<string, any>>({});
 
   onMount(async () => {
     const per = await data.perSite();
@@ -32,11 +33,7 @@
         rP: b[String(s)].cost,
         delta: b[String(s)].cost - a[String(s)].cost, // + R_P worse, - R_P better
       }));
-    chart = echarts.init(container);
-    const ro = new ResizeObserver(() => chart?.resize());
-    ro.observe(container);
     ready = true;
-    return () => ro.disconnect();
   });
 
   $effect(() => {
@@ -44,41 +41,39 @@
     const order = sortBy === 'delta'
       ? [...rows].sort((x, y) => x.delta - y.delta)
       : [...rows].sort((x, y) => x.site - y.site);
-    const nBetter = rows.filter((r) => r.delta < 0).length;
-    const opt: echarts.EChartsOption = {
-      tooltip: {
-        trigger: 'axis',
-        formatter: (params: any) => {
-          const p = Array.isArray(params) ? params[0] : params;
-          const r = order[p.dataIndex];
-          if (!r) return '';
-          const sign = r.delta < 0 ? 'R_P cheaper' : r.delta > 0 ? 'S_AR cheaper' : 'equal';
-          return `<b>site ${r.site}</b><br/>S_AR cost: ${r.sAr.toFixed(1)}<br/>R_P cost: ${r.rP.toFixed(1)}<br/>Δ (R_P−S_AR): <b>${r.delta.toFixed(1)}</b> — ${sign}`;
-        },
+    traces = [
+      {
+        type: 'bar',
+        x: order.map((r) => `#${r.site}`),
+        y: order.map((r) => r.delta),
+        marker: { color: order.map((r) => (r.delta < 0 ? palette.accent : palette.faint)) },
+        customdata: order.map((r) => [
+          r.site,
+          r.sAr.toFixed(1),
+          r.rP.toFixed(1),
+          r.delta.toFixed(1),
+          r.delta < 0 ? 'R_P cheaper' : r.delta > 0 ? 'S_AR cheaper' : 'equal',
+        ]),
+        hovertemplate:
+          '<b>site %{customdata[0]}</b><br/>S_AR cost: %{customdata[1]}<br/>R_P cost: %{customdata[2]}<br/>Δ (R_P−S_AR): <b>%{customdata[3]}</b> — %{customdata[4]}<extra></extra>',
       },
-      grid: { left: 56, right: 24, top: 32, bottom: 44 },
-      xAxis: { type: 'category', data: order.map((r) => `#${r.site}`), axisLabel: { show: false }, ...axisStyle },
-      yAxis: { type: 'value', name: 'Δ cost = R_P − S_AR', ...axisStyle },
-      series: [
-        {
-          type: 'bar',
-          data: order.map((r) => ({
-            value: r.delta,
-            itemStyle: { color: r.delta < 0 ? palette.accent : palette.faint },
-          })),
-          label: { show: false },
-        },
-        {
-          type: 'line',
-          data: order.map(() => 0),
-          symbol: 'none',
-          lineStyle: { color: palette.ink, type: 'dashed' },
-          tooltip: { show: false },
-          silent: true,
-        },
-      ],
+      {
+        type: 'scatter',
+        mode: 'lines',
+        x: order.map((r) => `#${r.site}`),
+        y: order.map(() => 0),
+        line: { color: palette.ink, dash: 'dash' },
+        hoverinfo: 'skip',
+        showlegend: false,
+      },
+    ];
+    layout = {
+      yaxis: { title: 'Δ cost = R_P − S_AR' },
+      xaxis: { showticklabels: false, showgrid: false },
+      hovermode: 'x',
+      bargap: 0.04,
+      margin: { l: 56, r: 24, t: 16, b: 30 },
     };
-    chart?.setOption(opt, { notMerge: true });
   });
 </script>
 
@@ -89,4 +84,6 @@
   </select>
   <span class="note" style="font-size:12px;color:#6b7280;">蓝 = R_P 更省（{rows.filter((r) => r.delta < 0).length}/70） · 灰 = S_AR 更省</span>
 </div>
-<div bind:this={container} style="width:100%;height:420px;"></div>
+{#if ready}
+  <Plot data={traces} {layout} height={420} ariaLabel="Per-site cost difference R_P vs S_AR" />
+{/if}

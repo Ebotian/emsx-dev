@@ -1,10 +1,10 @@
 <script lang="ts">
   /** Journey ladder: score evolution across research stages (honest narrative). */
   import { onMount } from 'svelte';
-  import * as echarts from 'echarts';
+  import Plot from './Plot.svelte';
   import { useI18n } from '../../lib/useI18n';
   import { data } from '../../lib/data';
-  import { palette, axisStyle, font } from '../../lib/palette';
+  import { palette } from '../../lib/palette';
 
   const i18n = useI18n();
   let lang = $state(i18n.lang);
@@ -13,37 +13,39 @@
 
   let ready = $state(false);
   let journey = $state<{ step: string; score: number; labelKey: string }[]>([]);
-  let container: HTMLDivElement;
-  let chart: echarts.ECharts | undefined;
+  let traces = $state<any[]>([]);
+  let layout = $state<Record<string, any>>({});
   const labels = $derived(journey.map((s) => (lang, t(s.labelKey))));
 
   onMount(async () => {
     journey = await data.journey();
-    chart = echarts.init(container);
-    const ro = new ResizeObserver(() => chart?.resize());
-    ro.observe(container);
     ready = true;
-    return () => ro.disconnect();
   });
 
   $effect(() => {
     if (!ready || journey.length === 0) return;
-    const option: echarts.EChartsOption = {
-      tooltip: { trigger: 'axis' },
-      grid: { left: 48, right: 16, top: 24, bottom: 40 },
-      xAxis: { type: 'category', data: labels, ...axisStyle },
-      yAxis: { type: 'value', min: 0, max: 1, ...axisStyle },
-      series: [
-        {
-          type: 'bar',
-          data: journey.map((s) => s.score),
-          itemStyle: { color: palette.accent },
-          label: { show: true, position: 'top', fontFamily: font },
-        },
-      ],
+    traces = [
+      {
+        type: 'bar',
+        x: labels,
+        y: journey.map((s) => s.score),
+        marker: { color: palette.accent },
+        text: journey.map((s) => s.score.toFixed(2)),
+        textposition: 'outside',
+        textfont: { size: 11 },
+        hovertemplate: '<b>%{x}</b><br/>score: %{y:.2f}<extra></extra>',
+      },
+    ];
+    layout = {
+      xaxis: { showticklabels: true },
+      yaxis: { title: 'score', range: [0, 1] },
+      hovermode: 'closest',
+      bargap: 0.3,
+      margin: { l: 48, r: 16, t: 24, b: 44 },
     };
-    chart?.setOption(option, { notMerge: true });
   });
 </script>
 
-<div bind:this={container} style="width:100%;height:320px;"></div>
+{#if ready}
+  <Plot data={traces} {layout} height={320} ariaLabel="Research journey score ladder" />
+{/if}

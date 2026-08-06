@@ -1,11 +1,11 @@
 <script lang="ts">
   /** Unified continuous-SOC leaderboard with controller selection. */
   import { onMount } from 'svelte';
-  import * as echarts from 'echarts';
+  import Plot from './Plot.svelte';
   import { useI18n } from '../../lib/useI18n';
   import { data } from '../../lib/data';
-  import { palette, axisStyle, seriesFor, font } from '../../lib/palette';
-  import { CONTROLLERS, FAMILY, type ControllerId } from '../../lib/types';
+  import { palette, seriesFor } from '../../lib/palette';
+  import type { ControllerId } from '../../lib/types';
   import ControllerSelect from '../ui/ControllerSelect.svelte';
 
   const i18n = useI18n();
@@ -14,17 +14,14 @@
   const t = (k: string) => i18n.t(k);
   let selected = $state<ControllerId[]>(['S_AR', 'R_P', 'R_FE96', 'MPC', 'OLFC-10', 'SDP']);
   let ready = $state(false);
-  let container: HTMLDivElement;
-  let chart: echarts.ECharts | undefined;
   let endpoints: Record<ControllerId, { score: number; cost: number; paperScore?: number }> | undefined;
+
+  let traces = $state<any[]>([]);
+  let layout = $state<Record<string, any>>({});
 
   onMount(async () => {
     endpoints = await data.endpoints();
-    chart = echarts.init(container);
-    const ro = new ResizeObserver(() => chart?.resize());
-    ro.observe(container);
     ready = true;
-    return () => ro.disconnect();
   });
 
   $effect(() => {
@@ -34,35 +31,45 @@
       score: endpoints[id].score,
       paper: endpoints[id].paperScore,
     }));
-    const opt: echarts.EChartsOption = {
-      tooltip: { trigger: 'axis' },
-      grid: { left: 48, right: 16, top: 24, bottom: 40 },
-      xAxis: { type: 'category', data: rows.map((r) => r.id), ...axisStyle },
-      yAxis: { type: 'value', min: 0, max: 1, ...axisStyle },
-      series: [
-        {
-          type: 'bar',
-          data: rows.map((r) => ({
-            value: r.score,
-            itemStyle: { color: seriesFor[r.id] },
-          })),
-          label: { show: true, position: 'top', fontFamily: font },
-        },
-        ...(rows.some((r) => r.paper !== undefined)
-          ? [{
+    traces = [
+      {
+        type: 'bar',
+        name: 'score',
+        x: rows.map((r) => r.id),
+        y: rows.map((r) => r.score),
+        marker: { color: rows.map((r) => seriesFor[r.id]) },
+        text: rows.map((r) => String(Number(r.score.toFixed(3)))),
+        textposition: 'outside',
+        cliponaxis: false,
+        textfont: { size: 11 },
+        hovertemplate: '<b>%{x}</b><br/>score: %{y:.3f}<extra></extra>',
+      },
+      ...(rows.some((r) => r.paper !== undefined)
+        ? [
+            {
               name: 'paper',
               type: 'scatter',
-              data: rows.map((r) => (r.paper !== undefined ? [r.id, r.paper] : null)),
-              symbolSize: 6,
-              itemStyle: { color: palette.faint },
-            }]
-          : []),
-      ],
+              mode: 'markers',
+              x: rows.filter((r) => r.paper !== undefined).map((r) => r.id),
+              y: rows.filter((r) => r.paper !== undefined).map((r) => r.paper),
+              marker: { color: palette.faint, size: 6 },
+              hovertemplate: '<b>%{x}</b><br/>paper: %{y:.3f}<extra></extra>',
+            },
+          ]
+        : []),
+    ];
+    layout = {
+      yaxis: { range: [0, 1] },
+      legend: { orientation: 'h', y: 1.12, x: 0 },
+      hovermode: 'x unified',
+      bargap: 0.3,
+      margin: { l: 48, r: 16, t: 44, b: 40 },
     };
-    chart.setOption(opt, { notMerge: true });
   });
 </script>
 
 <ControllerSelect bind:selected onchange={(v) => (selected = v)} />
-<div bind:this={container} style="width:100%;height:420px;"></div>
+{#if ready}
+  <Plot data={traces} {layout} height={420} ariaLabel="Controller leaderboard — continuous SOC score" />
+{/if}
 <p class="note">{t('results.officialNote')}</p>

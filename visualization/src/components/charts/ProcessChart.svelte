@@ -1,9 +1,9 @@
 <script lang="ts">
   /** 07: process comparison — cumulative cost + SOC over the representative week, controllers selectable. */
   import { onMount } from 'svelte';
-  import * as echarts from 'echarts';
+  import Plot from './Plot.svelte';
   import { data } from '../../lib/data';
-  import { palette, axisStyle, seriesFor, font } from '../../lib/palette';
+  import { palette, seriesFor } from '../../lib/palette';
   import { useI18n } from '../../lib/useI18n';
   import type { ControllerId } from '../../lib/types';
 
@@ -14,22 +14,26 @@
 
   let selected = $state<ControllerId[]>(['S_AR', 'R_P', 'MPC', 'SDP']);
   let ready = $state(false);
-  let container: HTMLDivElement;
-  let chart: echarts.ECharts | undefined;
   const seriesCache = new Map<string, { cumCost: number[]; soc: number[]; daily: number[] }>();
 
+  let traces = $state<any[]>([]);
+  let layout = $state<Record<string, any>>({});
+
   onMount(() => {
-    chart = echarts.init(container);
-    const ro = new ResizeObserver(() => chart?.resize());
-    ro.observe(container);
     ready = true;
-    return () => ro.disconnect();
   });
 
-  $effect(async () => {
+  let runId = 0;
+  $effect(() => {
     if (!ready) return;
+    const ids = [...selected]; // read deps synchronously — async $effect breaks Svelte 5 tracking
+    const my = ++runId;
+    void loadTraces(ids, my);
+  });
+
+  async function loadTraces(ids: ControllerId[], my: number) {
     const rows: { name: string; cum: number[]; soc: number[]; color: string }[] = [];
-    for (const cid of selected) {
+    for (const cid of ids) {
       let s = seriesCache.get(cid);
       if (!s) {
         const d = await data.process(cid);
@@ -38,22 +42,37 @@
       }
       rows.push({ name: cid, cum: s.cumCost, soc: s.soc, color: seriesFor[cid] });
     }
-    const opt: echarts.EChartsOption = {
-      tooltip: { trigger: 'axis' },
-      legend: { top: 0, textStyle: { fontFamily: font } },
-      grid: { left: 56, right: 56, top: 32, bottom: 40 },
-      xAxis: { type: 'category', data: rows[0]?.cum.map((_, i) => i + 1) ?? [], ...axisStyle },
-      yAxis: [
-        { type: 'value', name: 'cumulative cost', ...axisStyle },
-        { type: 'value', name: 'SOC', min: 0, max: 1, ...axisStyle },
-      ],
-      series: [
-        ...rows.map((r) => ({ name: `${r.name} cum`, type: 'line', data: r.cum, itemStyle: { color: r.color }, symbol: 'none' })),
-        ...rows.map((r) => ({ name: `${r.name} SOC`, type: 'line', yAxisIndex: 1, data: r.soc, itemStyle: { color: r.color }, symbol: 'none', lineStyle: { type: 'dashed' } })),
-      ],
+    if (my !== runId) return; // a newer selection started while fetching — drop stale result
+    const x = rows[0]?.cum.map((_, i) => i + 1) ?? [];
+    traces = [
+      ...rows.map((r) => ({
+        name: `${r.name} cum`,
+        type: 'scatter',
+        mode: 'lines',
+        x,
+        y: r.cum,
+        line: { color: r.color },
+        hovertemplate: `<b>step %{x}</b><br/>${r.name} cumulative cost: %{y:.1f}<extra></extra>`,
+      })),
+      ...rows.map((r) => ({
+        name: `${r.name} SOC`,
+        type: 'scatter',
+        mode: 'lines',
+        x,
+        y: r.soc,
+        yaxis: 'y2',
+        line: { color: r.color, dash: 'dash' },
+        hovertemplate: `<b>step %{x}</b><br/>${r.name} SOC: %{y:.3f}<extra></extra>`,
+      })),
+    ];
+    layout = {
+      yaxis: { title: 'cumulative cost' },
+      yaxis2: { title: 'SOC', range: [0, 1], overlaying: 'y', side: 'right' },
+      legend: { orientation: 'h', y: 1.08, x: 0 },
+      hovermode: 'x unified',
+      margin: { l: 56, r: 56, t: 80, b: 40 },
     };
-    chart.setOption(opt, { notMerge: true });
-  });
+  }
 </script>
 
 <fieldset style="border:none;padding:0;margin:0 0 8px;display:flex;gap:10px;flex-wrap:wrap;">
@@ -64,4 +83,6 @@
     </label>
   {/each}
 </fieldset>
-<div bind:this={container} style="width:100%;height:460px;"></div>
+{#if ready}
+  <Plot data={traces} {layout} height={460} ariaLabel="Process comparison — cumulative cost and SOC over the representative week" />
+{/if}

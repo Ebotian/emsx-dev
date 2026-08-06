@@ -5,8 +5,8 @@
    *  Controllers drawn as scatter symbols (sites are discrete — no connecting lines);
    *  rank by 24h forecast RMSE or site id. */
   import { onMount } from 'svelte';
-  import * as echarts from 'echarts';
-  import { palette, axisStyle, seriesFor, font } from '../../lib/palette';
+  import Plot from './Plot.svelte';
+  import { palette, seriesFor } from '../../lib/palette';
   import type { ControllerId } from '../../lib/types';
 
   type Row = { site: number; rmse96: number; dummy_cost: number; gains: Record<string, number>; lp_gain?: number };
@@ -16,18 +16,15 @@
   let ready = $state(false);
   let sortBy = $state<'rmse' | 'site'>('rmse');
   let selected = $state<ControllerId[]>(DEFAULT_CTRL);
-  let container: HTMLDivElement;
-  let chart: echarts.ECharts | undefined;
   let rows: Row[] = [];
+
+  let data = $state<any[]>([]);
+  let layout = $state<Record<string, any>>({});
 
   onMount(async () => {
     const res = await fetch('/data/site_gain.json', { cache: 'no-store' });
     rows = await res.json();
-    chart = echarts.init(container);
-    const ro = new ResizeObserver(() => chart?.resize());
-    ro.observe(container);
     ready = true;
-    return () => ro.disconnect();
   });
 
   function toggle(c: ControllerId) {
@@ -43,59 +40,64 @@
     // rank axis: sites occupy equal slots 1..70 in RMSE order (paper Fig.3 style);
     // tick labels show the actual RMSE at that rank. Avoids long-tail crowding.
     const rmseAtRank = new Map(order.map((r, i) => [i + 1, r.rmse96]));
-    const tt = (params: any) => {
-      const p = Array.isArray(params) ? params[0] : params;
-      const r = order[p.dataIndex];
-      if (!r) return '';
-      const head = `<b>site ${r.site}</b> (rank ${(byRmse ? p.dataIndex : p.dataIndex) + 1}, 24h RMSE ${r.rmse96.toFixed(1)}, dummy ${r.dummy_cost.toFixed(0)})<br/>`;
-      const rows_ = (Array.isArray(params) ? params : [params])
-        .map((q: any) => `${q.marker}${q.seriesName}: ${Number(q.value[1]).toFixed(1)}`)
-        .join('<br/>');
-      return head + rows_;
-    };
-    const xy = (r: Row, i: number, v: number) => (byRmse ? [i + 1, v] : [r.site, v]);
-    const opt: echarts.EChartsOption = {
-      tooltip: { trigger: 'axis', formatter: tt },
-      legend: { top: 0, type: 'scroll', textStyle: { fontFamily: font } },
-      grid: { left: 56, right: 24, top: 36, bottom: 48 },
-      xAxis: byRmse
+    const xs = order.map((r, i) => (byRmse ? i + 1 : `#${r.site}`));
+    const cd = (r: Row, i: number) => [r.site, i + 1, r.rmse96, r.dummy_cost];
+    const headTpl =
+      '<b>site %{customdata[0]}</b> (rank %{customdata[1]}, 24h RMSE %{customdata[2]:.1f}, dummy %{customdata[3]:.0f})<br/>%{fullData.name}: %{y:.1f}<extra></extra>';
+    const lineTpl = '%{fullData.name}: %{y:.1f}<extra></extra>';
+
+    const traces: any[] = [];
+    if (order[0]?.lp_gain !== undefined) {
+      traces.push({
+        type: 'scatter',
+        mode: 'lines',
+        name: 'perfect-prediction upper bound (LP)',
+        x: xs,
+        y: order.map((r) => r.lp_gain!),
+        line: { color: palette.danger, dash: 'dash', width: 1.5 },
+        customdata: order.map(cd),
+        hovertemplate: headTpl,
+      });
+    }
+    traces.push({
+      type: 'scatter',
+      mode: 'lines',
+      name: 'dummy (zero gain)',
+      x: xs,
+      y: order.map(() => 0),
+      line: { color: palette.faint, dash: 'dot', width: 1.2 },
+      customdata: order.map(cd),
+      hovertemplate: traces.length === 0 ? headTpl : lineTpl,
+    });
+    for (const c of selected) {
+      traces.push({
+        type: 'scatter',
+        mode: 'markers',
+        name: c,
+        x: xs,
+        y: order.map((r) => r.gains[c] ?? 0),
+        marker: { color: seriesFor[c], size: 6 },
+        customdata: order.map(cd),
+        hovertemplate: lineTpl,
+      });
+    }
+    data = traces;
+
+    layout = {
+      legend: { orientation: 'h', x: 0, y: 1.12 },
+      hovermode: 'x unified',
+      margin: { l: 64, r: 24, t: 56, b: 52 },
+      xaxis: byRmse
         ? {
-            type: 'value',
-            min: 1,
-            max: 70,
-            interval: 5,
-            name: 'sites ranked by 24h forecast RMSE (tick = RMSE kWh)',
-            axisLabel: { formatter: (v: number) => (rmseAtRank.get(v) ?? '').toFixed(0), fontFamily: font },
-            ...axisStyle,
+            title: 'sites ranked by 24h forecast RMSE (tick = RMSE kWh)',
+            range: [1, 70],
+            tickmode: 'array',
+            tickvals: Array.from({ length: 14 }, (_, i) => 1 + i * 5),
+            ticktext: Array.from({ length: 14 }, (_, i) => rmseAtRank.get(1 + i * 5)?.toFixed(0) ?? ''),
           }
-        : {
-            type: 'category',
-            data: order.map((r) => `#${r.site}`),
-            axisLabel: { show: false },
-            name: 'site id →',
-            ...axisStyle,
-          },
-      yAxis: { type: 'value', name: 'gain = dummy − cost', ...axisStyle },
-      series: [
-        ...(rows[0]?.lp_gain !== undefined ? [{
-          name: 'perfect-prediction upper bound (LP)',
-          type: 'line',
-          data: order.map((r, i) => xy(r, i, r.lp_gain!)),
-          symbol: 'none',
-          lineStyle: { type: 'dashed', width: 1.5, color: palette.danger },
-        }] : []),
-        { name: 'dummy (zero gain)', type: 'line', data: order.map((r, i) => xy(r, i, 0)), symbol: 'none', lineStyle: { type: 'dotted', color: palette.faint } },
-        ...selected.map((c) => ({
-          name: c,
-          type: 'scatter',
-          data: order.map((r, i) => xy(r, i, r.gains[c] ?? 0)),
-          symbolSize: 5,
-          itemStyle: { color: seriesFor[c] },
-          emphasis: { focus: 'series' },
-        })),
-      ],
+        : { type: 'category', title: 'site id →', showticklabels: false },
+      yaxis: { title: 'gain = dummy − cost' },
     };
-    chart?.setOption(opt, { notMerge: true });
   });
 </script>
 
@@ -113,4 +115,6 @@
     {/each}
   </span>
 </div>
-<div bind:this={container} style="width:100%;height:420px;"></div>
+{#if ready && data.length > 0}
+  <Plot {data} {layout} height={420} ariaLabel="Per-site gain of each controller over dummy, ranked by 24h forecast RMSE or site id" />
+{/if}
