@@ -40,26 +40,44 @@
 
   $effect(() => {
     if (!ready || steps.length === 0) return;
-    const x = steps.map((s) => s.t * 15); // minutes
-    const maxMin = x[x.length - 1];
     const cuts = periodBounds(steps);
-    // energy-balance tooltip: same text as the original formatter, carried
-    // in customdata so every panel (and every trace) shows the full balance box.
     const tt = (s: any) =>
       `<b>t=${s.t} (${fmtTime(s.t * 15)}), period ${s.period}</b><br>` +
       `load=${s.load.toFixed(1)}  pv=${s.pv.toFixed(1)}  z=${s.z.toFixed(1)}<br>` +
       `SOC=${s[`soc_${cid}`].toFixed(3)}  u(${cid})=${s[`u_${cid}`].toFixed(3)}<br>` +
       `import = z + u·P·Δt = ${(s.z + (s[`u_${cid}`] ?? 0) * P * 0.25).toFixed(1)} kWh`;
     const fullTpl = '<b>%{customdata[0]}</b><extra></extra>';
-    const cd = steps.map((s) => [tt(s)]);
+
+    // t restarts at 1 every period; without a break, Plotly connects the last
+    // point of a period to the first of the next across the whole x range
+    // (a long diagonal line). Insert null at period boundaries to break the line.
+    const xs: (number | null)[] = [];
+    const yl: (number | null)[] = [];
+    const yp: (number | null)[] = [];
+    const yz: (number | null)[] = [];
+    const ysoc: (number | null)[] = [];
+    const yu: (number | null)[] = [];
+    const cd: (string[] | null)[] = [];
+    for (let i = 0; i < steps.length; i++) {
+      const s = steps[i];
+      if (i > 0 && s.period !== steps[i - 1].period) {
+        xs.push(null); yl.push(null); yp.push(null); yz.push(null);
+        ysoc.push(null); yu.push(null); cd.push(null);
+      }
+      xs.push(s.t * 15);
+      yl.push(s.load); yp.push(s.pv); yz.push(s.z);
+      ysoc.push(s[`soc_${cid}`]); yu.push(s[`u_${cid}`]);
+      cd.push([tt(s)]);
+    }
+    const maxMin = Math.max(...xs.filter((v): v is number => v !== null));
 
     data = [
       {
         type: 'scatter',
         mode: 'lines',
         name: 'load',
-        x,
-        y: steps.map((s) => s.load),
+        x: xs,
+        y: yl,
         line: { color: palette.ink },
         customdata: cd,
         hovertemplate: fullTpl,
@@ -68,8 +86,8 @@
         type: 'scatter',
         mode: 'lines',
         name: 'pv',
-        x,
-        y: steps.map((s) => s.pv),
+        x: xs,
+        y: yp,
         line: { color: palette.paperLookahead[0] },
         customdata: cd,
         hovertemplate: fullTpl,
@@ -78,8 +96,8 @@
         type: 'scatter',
         mode: 'lines',
         name: 'z_settle',
-        x,
-        y: steps.map((s) => s.z),
+        x: xs,
+        y: yz,
         line: { color: palette.faint, dash: 'dash' },
         customdata: cd,
         hovertemplate: fullTpl,
@@ -88,8 +106,8 @@
         type: 'scatter',
         mode: 'lines',
         name: `SOC (${cid})`,
-        x,
-        y: steps.map((s) => s[`soc_${cid}`]),
+        x: xs,
+        y: ysoc,
         line: { color: seriesFor[cid] },
         fill: 'tozeroy',
         fillcolor: withAlpha(seriesFor[cid], 0.08),
@@ -100,8 +118,8 @@
         type: 'scatter',
         mode: 'lines',
         name: `u (${cid})`,
-        x,
-        y: steps.map((s) => s[`u_${cid}`]),
+        x: xs,
+        y: yu,
         line: { color: seriesFor[cid], width: 1.5 },
         customdata: cd,
         hovertemplate: fullTpl,
