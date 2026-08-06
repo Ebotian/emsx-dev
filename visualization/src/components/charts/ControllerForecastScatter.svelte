@@ -44,7 +44,7 @@
 
     traces = [
       {
-        name: 'y = x',
+        name: 'y = x (equal RMSE)',
         type: 'scatter',
         mode: 'lines',
         x: [lo, xmax],
