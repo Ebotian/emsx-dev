@@ -47,3 +47,7 @@ external_data/ausgrid/*.csv
 external_data/ausgrid/*.zip
 external_data/aemo/raw/
 external_data/aemo/validation/
+
+# Ausgrid dataset artifacts (binary, not versioned)
+external_data/ausgrid/*.pdf
+external_data/ausgrid/*.ZIP

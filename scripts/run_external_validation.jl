@@ -94,7 +94,7 @@ function fit_ar1(train_df::DataFrame)
     z = Float64.(train_df.z)
     n = length(z)
     n_weeks = n ÷ HORIZON
-    n_weeks < 2 && error("need >= 2 weeks of training data")
+    n_weeks < 1 && error("need >= 1 week of training data")
     zmat = collect(reshape(z[1:n_weeks * HORIZON], HORIZON, n_weeks)')
     is_weekend = falses(HORIZON)
     for t in 1:HORIZON
