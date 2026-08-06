@@ -34,7 +34,7 @@
         x,
         y: order.map((p) => p.rmse96),
         marker: { color: palette.accent },
-        hovertemplate: '<b>%{x}</b><br/>24h-ahead RMSE: %{y:.2f} kWh<extra></extra>',
+        hovertemplate: '<b>%{x}</b><br>24h-ahead RMSE: %{y:.2f} kWh<extra></extra>',
       },
       {
         type: 'bar',
@@ -42,12 +42,14 @@
         x,
         y: order.map((p) => p.rmse1),
         marker: { color: palette.paperLookahead[0] },
-        hovertemplate: '<b>%{x}</b><br/>15min-ahead RMSE: %{y:.2f} kWh<extra></extra>',
+        hovertemplate: '<b>%{x}</b><br>15min-ahead RMSE: %{y:.2f} kWh<extra></extra>',
       },
     ];
     layout = {
       yaxis: { title: 'RMSE (kWh)' },
       xaxis: {
+        type: 'category',
+        categoryorder: 'trace',
         tickmode: 'array',
         tickvals: tickIdx,
         ticktext: tickIdx.map((i) => `#${order[i].site}`),
