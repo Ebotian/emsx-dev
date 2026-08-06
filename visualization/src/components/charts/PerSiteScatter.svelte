@@ -69,7 +69,7 @@
     ];
     layout = {
       yaxis: { title: 'Δ cost = R_P − S_AR' },
-      xaxis: { showticklabels: false, showgrid: false },
+      xaxis: { type: 'category', categoryorder: 'trace', showticklabels: false, showgrid: false },
       hovermode: 'x',
       bargap: 0.04,
       margin: { l: 56, r: 24, t: 16, b: 30 },
