@@ -29,16 +29,16 @@
     const cust = sites.map((s) => [
       s.site,
       s.n,
-      s.ar1.rmse.toFixed(1),
+      s.ar1.rmse.toFixed(2),
       String(s.ar1.r2),
-      s.se.rmse.toFixed(1),
+      s.se.rmse.toFixed(2),
       String(s.se.r2),
-      s.persist.rmse.toFixed(1),
+      s.persist.rmse.toFixed(2),
       String(s.persist.r2),
     ]);
     const tpl =
       '<b>site %{customdata[0]}</b> (n=%{customdata[1]})<br>' +
-      '%{fullData.name}: rmse %{y:.1f}<br>' +
+      '%{fullData.name}: rmse %{y:.2f}<br>' +
       'SE(k=1) reference: rmse %{customdata[4]} · r² %{customdata[5]}<extra></extra>';
 
     traces = [
