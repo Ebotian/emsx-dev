@@ -8,7 +8,21 @@
     "results": "Results",
     "perSite": "Per-Site",
     "process": "Process",
-    "sensitivity": "Sensitivity"
+    "sensitivity": "Sensitivity",
+    "ausgrid": "Ausgrid",
+    "aemo": "AEMO"
+  },
+  "ausgrid": {
+    "title": "Ausgrid Dataset Validation",
+    "note": "300 Australian homes (30-min net demand, 2010-07~2013-06); S_AR / R_P gain over dummy; TOU prices, physical SOC replay",
+    "curves": "Dispatch-forecast curves",
+    "curvesNote": "Actual net demand, AR(1) 1-step prediction and persistence over each site's test window; site switchable"
+  },
+  "aemo": {
+    "title": "AEMO Dataset Validation",
+    "note": "NEM 5 regions (5-min net demand + prices); S_AR / R_P gain over dummy; TOU spread, physical SOC replay",
+    "curves": "Dispatch-forecast curves",
+    "curvesNote": "Actual net demand, AR(1) 1-step prediction and persistence over each region's test window; region switchable"
   },
   "index": {
     "title": "EMSx Microgrid Battery Control — Audit & Online Control Study",

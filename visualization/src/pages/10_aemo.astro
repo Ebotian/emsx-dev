@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ExternalGainChart from '../components/charts/ExternalGainChart.svelte';
+import ExternalCurveBrowser from '../components/charts/ExternalCurveBrowser.svelte';
+---
+
+<BaseLayout title="AEMO Validation">
+  <section class="card">
+    <h2 data-i18n="aemo.title">AEMO 数据集验证</h2>
+    <p class="convention-note" data-i18n="aemo.note">NEM 5 区域（5min 净需求+电价）；S_AR / R_P 相对 dummy 的 gain；TOU 价差、物理 SOC 回放</p>
+    <ExternalGainChart dataUrl="/data/aemo/per_site_gain.json" />
+  </section>
+  <section class="card">
+    <h2 data-i18n="aemo.curves">调度-预测曲线</h2>
+    <p class="convention-note" data-i18n="aemo.curvesNote">每区域测试期窗口的实际净需求、AR(1) 一步预测与 persistence；区域可切换</p>
+    <ExternalCurveBrowser dataUrl="/data/aemo/curves.json" label="AEMO" />
+  </section>
+</BaseLayout>
