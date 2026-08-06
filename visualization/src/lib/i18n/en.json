@@ -43,15 +43,14 @@
     "soc": "SOC trajectory"
   },
   "forecast": {
-    "title": "Forecast Accuracy (15min → 24h)",
-    "note": "RMSE/MAE/bias/R² over the forecast time domain; 70 sites, training periods",
-    "confidence": "Forecast interval width (uncertainty grows with horizon)",
-    "confidenceNote": "Residual quantile interval widths (50/80/95%) — wider means less certain",
-    "coverage": "Nominal vs empirical coverage calibration",
-    "siteRmse": "Per-site 24h-ahead forecast RMSE (paper Figure 3 analogue)",
-    "siteRmseNote": "70 sites ranked by 24h-ahead net-demand forecast RMSE; 15min-ahead shown as reference",
-    "confidenceFamily": "Per-site forecast confidence curve family (R², %)",
-    "confidenceFamilyNote": "One curve per site: median 91.1% at 15min → 70.3% at 24h; P5–P95 envelope"
+    "confidenceFamily": "Per-site predictability curve family (R², %)",
+    "confidenceFamilyNote": "R² = relative error reduction vs the constant-mean baseline — data predictability / explanatory power, not confidence; 70 sites, training periods, dataset forecast",
+    "siteRmse": "Per-site 24h-ahead forecast RMSE",
+    "siteRmseNote": "70 sites ranked by 24h-ahead net-demand forecast RMSE; 15min-ahead as reference. Absolute scale (no paper min-max normalization): same ordering direction as paper Fig. 3 but not numerically comparable",
+    "ctrlCompare": "Controller one-step forecast comparison (test set, out-of-sample)",
+    "ctrlCompareNote": "S_AR's actual 1-step forecast (AR(1) conditional mean) vs dataset forecast (k=1) vs persistence; aligned pairing, AR(1) fitted on training data. AR(1) wins on 54/70 sites; on worst-scheduling sites 9/3 the SE forecast is better — forecast quality and scheduling performance are not simply causal. #62 is the only large net-export PV site, an RMSE scale outlier",
+    "curves": "Scheduling-forecast curve browser",
+    "curvesNote": "All 70 sites available; default compares best-scheduling (33/59) vs worst-scheduling (9/3). Correlation, not causation"
   },
   "journey": {
     "exploit": "exploit parity (0.9973)",

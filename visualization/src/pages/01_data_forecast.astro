@@ -1,35 +1,30 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import AccuracyCurveChart from '../components/charts/AccuracyCurveChart.svelte';
 import SiteConfidenceChart from '../components/charts/SiteConfidenceChart.svelte';
-import ConfidenceWidthChart from '../components/charts/ConfidenceWidthChart.svelte';
-import CoverageChart from '../components/charts/CoverageChart.svelte';
 import SiteRMSEChart from '../components/charts/SiteRMSEChart.svelte';
+import ControllerForecastScatter from '../components/charts/ControllerForecastScatter.svelte';
+import ForecastCurveBrowser from '../components/charts/ForecastCurveBrowser.svelte';
 ---
 
 <BaseLayout title="Forecast Accuracy">
   <section class="card">
-    <h2 data-i18n="forecast.title">预测准确性（随预测时间 15min → 24h）</h2>
-    <p class="convention-note" data-i18n="forecast.note">RMSE/MAE/bias/R² 随预测时域变化；70 站点训练期</p>
-    <AccuracyCurveChart client:load />
-  </section>
-  <section class="card">
-    <h2 data-i18n="forecast.confidenceFamily">逐站点预测置信度曲线族（R²，%）</h2>
-    <p class="convention-note" data-i18n="forecast.confidenceFamilyNote">70 站点各一条曲线：15min 中位 91.1% → 24h 中位 70.3%；P5–P95 包络</p>
+    <h2 data-i18n="forecast.confidenceFamily">逐站点可预测性曲线族（R²，%）</h2>
+    <p class="convention-note" data-i18n="forecast.confidenceFamilyNote">R² = 预测相对"恒用均值"的误差改进比，衡量数据可预测性/解释力，不是置信度；70 站点训练期、数据集 forecast</p>
     <SiteConfidenceChart client:load />
   </section>
   <section class="card">
-    <h2 data-i18n="forecast.confidence">预测区间宽度（不确定性随 horizon 增长）</h2>
-    <p class="convention-note" data-i18n="forecast.confidenceNote">50/80/95% 残差分位数区间宽度——越远越不确定</p>
-    <ConfidenceWidthChart client:load />
-  </section>
-  <section class="card">
-    <h2 data-i18n="forecast.coverage">名义 vs 经验覆盖率校准</h2>
-    <CoverageChart client:load />
-  </section>
-  <section class="card">
-    <h2 data-i18n="forecast.siteRmse">逐站点 24h 预测 RMSE（对标论文 Figure 3）</h2>
-    <p class="convention-note" data-i18n="forecast.siteRmseNote">70 站点按 24h-ahead 净需求预测 RMSE 升序；15min-ahead 为参照</p>
+    <h2 data-i18n="forecast.siteRmse">逐站点 24h 预测 RMSE</h2>
+    <p class="convention-note" data-i18n="forecast.siteRmseNote">70 站点按 24h-ahead 净需求预测 RMSE 升序；15min-ahead 为参照。绝对尺度（未做论文 min-max 归一化），与论文 Figure 3 的归一化可预测性排序方向一致但数值不可直接对标</p>
     <SiteRMSEChart client:load />
+  </section>
+  <section class="card">
+    <h2 data-i18n="forecast.ctrlCompare">控制器一步预测对比（测试期，out-of-sample）</h2>
+    <p class="convention-note" data-i18n="forecast.ctrlCompareNote">S_AR 实际使用的一步预测（AR(1) 条件均值）vs 数据集 forecast(k=1) vs persistence；统一配对口径、AR(1) 用训练期系数。AR(1) 在 54/70 站点更优；最差调度站点 9/3 上 SE forecast 反而更准——预测质量与调度表现非简单因果。#62 为唯一大型净出口 PV 站，RMSE 尺度离群</p>
+    <ControllerForecastScatter client:load />
+  </section>
+  <section class="card">
+    <h2 data-i18n="forecast.curves">调度-预测曲线浏览器</h2>
+    <p class="convention-note" data-i18n="forecast.curvesNote">覆盖全部 70 站点；默认对照最优调度（33/59）与最差调度（9/3）。展示调度表现与预测形态的相关性，非因果</p>
+    <ForecastCurveBrowser client:load />
   </section>
 </BaseLayout>
