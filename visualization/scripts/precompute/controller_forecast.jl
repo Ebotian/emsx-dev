@@ -5,8 +5,10 @@
 # Evaluates the forecast actually used by the S_AR controller:
 #   - AR(1):      ẑ = alpha[τ]·z_τ + beta[τ]   (τ = period-internal step,
 #                exactly as the online controller indexes alpha/beta)
-#   - SE(k=1):    ẑ = load_00 − pv_00 (row r)  (dataset's own day-ahead
-#                forecast column, "issued at row r, targets row r+1")
+#   - SE(k=1):    ẑ = load_00 − pv_00 (row r+1)  (dataset's own forecast
+#                column of the NEXT row, matching the EMSx Information(t)
+#                mapping: a decision at t receives the forecasts stored in
+#                row t+1, whose load_00/pv_00 forecast period t+1)
 #   - persistence: ẑ = z_τ                     (last actual as the forecast)
 # Alignment (consistent with visualization/scripts/precompute/accuracy.py):
 #   row-r information predicts row r+1. Online semantics: the controller's
@@ -66,7 +68,7 @@ for sid in 1:70
             z_cur = site_net(rows, r)
             z_tgt = site_net(rows, r + 1)
             push!(errs_ar1, alpha[τ] * z_cur + beta[τ] - z_tgt)
-            push!(errs_se,  (rows.load_00[r] - rows.pv_00[r]) - z_tgt)
+            push!(errs_se,  (rows.load_00[r+1] - rows.pv_00[r+1]) - z_tgt)
             push!(errs_pers, z_cur - z_tgt)
             push!(acts, z_tgt)
         end
@@ -80,7 +82,7 @@ for sid in 1:70
                 r = τ + 96
                 push!(a, site_net(rows, r + 1))
                 push!(b, alpha[τ] * site_net(rows, r) + beta[τ])
-                push!(c, rows.load_00[r] - rows.pv_00[r])
+                push!(c, rows.load_00[r+1] - rows.pv_00[r+1])
             end
             push!(curves, Dict("site" => sid, "actual" => round.(a, digits=3),
                                "ar1" => round.(b, digits=3), "se" => round.(c, digits=3)))
@@ -108,7 +110,7 @@ end
 
 meta = Dict("track" => "test",
             "horizon_steps" => 1,
-            "aligned" => "row r info -> row r+1 actual; AR(1) tau = period-internal step (online semantics); SE uses row r's load_00-pv_00",
+            "aligned" => "row r+1 forecast -> row r+1 actual (EMSx Information(t): decision at r sees row r+1's load_00/pv_00); AR(1) tau = period-internal step (online semantics)",
             "missing_value_functions" => missing_vf)
 
 open(joinpath(OUT_DIR, "controller_forecast.json"), "w") do io

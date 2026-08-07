@@ -78,6 +78,9 @@
 ### 3.6 调度-预测曲线对齐（persistence 曾与 actual 完全重合）
 外部页曲线最初将 persistence 存为 `persist[t] = z(t)`，而 actual 同位置也是 `z(t)` → 两条线逐点相同、persistence 线无信息量；且 ar1 画在"决策时刻"而非"被预测目标时刻"。修正：三个序列统一对齐到**目标时刻 t**——`actual[t]=z_t`、`persist[t]=z_{t-1}`（一步 persistence 预测）、`ar1[t]=α(τ_{t-1})·z_{t-1}+β(τ_{t-1})`（t=1 用训练末值），与主项目 `controller_forecast.jl` 的 `se/ar1` 对齐语义一致；两线对 actual 的垂直差即一步预测误差。两个数据集已重跑（cost/gain 不变），页面网桥目检确认 persistence 线滞后一格。
 
+### 3.7 主项目 SE(k=1) 预测评估的差一行修正
+用户质疑"数据集 SE 预测在多数站点比 persistence 差是否合理"。调查确认：EMSx 数据集列 `load_00` 对齐的是**当前行**时段（全 70 站实测 65/70 最优对齐为 net[r]），而 EMSx.jl `Information(t)` 在决策点 t 读取的是**下一行**（`data[t+1]`）的 forecast 列——即 k=1 预测 = `load_00[r+1]−pv_00[r+1]`。可视化预计算 `controller_forecast.jl` 原用 `load_00[r]−pv_00[r]` 预测 `net[r+1]`，差一行把数据集预测系统性变差（全站 RMSE 75.8 vs 修正后 61.2）。修正对齐后：**数据集 SE(k=1)（施耐德 AR+随机森林）在 69/70 站点优于 persistence、68/70 优于 AR(1) 控制器预测**——施耐德预测本身合理（15min 短时程模型预测被 persistence 超越本属已知现象，但其预测实际并未被超越）。预测质量与调度表现仍非简单因果（#9/#3 预测最优而调度最差）。数据/图表/i18n 已同步更新。
+
 ---
 
 ## 4. 下一步
