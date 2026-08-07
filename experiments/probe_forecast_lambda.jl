@@ -35,8 +35,8 @@ function decide(u_grid, zhat, soc, itp, b, s, E, scale)
     return bestu
 end
 
-# results[λ] -> vector of per-site (gain, wmae_dec)
-res = Dict{Float64,Vector{Tuple{Float64,Float64}}}(lam => Tuple{Float64,Float64}[] for lam in LAMBDAS)
+# results[λ] -> vector of per-site (site, gain, wmae_dec)
+res = Dict{Float64,Vector{Tuple{Float64,Float64,Float64}}}(lam => Tuple{Float64,Float64,Float64}[] for lam in LAMBDAS)
 
 for sid in 1:70
     df = CSV.read(joinpath(TEST_DIR, "$(sid).csv.gz"), DataFrame)
@@ -69,21 +69,28 @@ for sid in 1:70
                 cost_d += b * max(0.0, z_tgt) - s * max(0.0, -z_tgt)   # dummy u=0
             end
         end
-        push!(res[lam], (cost_d - cost, wmae / nd))
+        push!(res[lam], (Float64(sid), cost_d - cost, wmae / nd))
     end
 end
 
-# aggregate + print the curve
-println("=== 收益-精度曲线（70 站点均值） ===")
-println("λ     gain(均值)      wmae_dec(均值)   边际gain")
-rows_out = [(lam, mean(x[1] for x in res[lam]), mean(x[2] for x in res[lam])) for lam in LAMBDAS]
-for i in eachindex(rows_out)
-    lam, g, w = rows_out[i]
-    mg = i == 1 ? NaN : g - rows_out[i-1][2]
-    println(rpad(string(lam), 5), lpad(round(Int, g), 12), lpad(round(w, digits=1), 14), lpad(round(Int, mg), 10))
-end
-out = Dict(string(lam) => [Dict("gain" => x[1], "wmae" => x[2]) for x in res[lam]] for lam in LAMBDAS)
+# save raw data first (before any print that could fail)
+out = Dict(string(lam) => [Dict("site" => x[1], "gain" => x[2], "wmae" => x[3]) for x in res[lam]] for lam in LAMBDAS)
 open("/tmp/probe_lambda.json", "w") do io
     JSON.print(io, out, 2)
 end
 println("saved /tmp/probe_lambda.json")
+
+# aggregate + print the curve (robust to non-finite)
+safemean(v) = begin xs = filter(isfinite, collect(v)); isempty(xs) ? NaN : sum(xs)/length(xs); end
+println("=== 收益-精度曲线（70 站点均值） ===")
+println("λ     gain(均值)      wmae_dec(均值)   边际gain   [非有限站点数]")
+gains = [safemean(x[2] for x in res[lam]) for lam in LAMBDAS]
+for i in eachindex(LAMBDAS)
+    lam = LAMBDAS[i]
+    g = gains[i]
+    w = safemean(x[3] for x in res[lam])
+    nbad = count(x -> !isfinite(x[2]), res[lam])
+    mg = i == 1 ? NaN : g - gains[i-1]
+    println(rpad(string(lam), 5), lpad(round(Int, g), 12), lpad(round(w, digits=1), 14),
+            lpad(round(Int, mg), 10), "   [", nbad, "]")
+end
