@@ -1,16 +1,20 @@
 <script lang="ts">
   /** Controller one-step forecast comparison (test set, out-of-sample).
-   *  Scatter: x = SE forecast RMSE (k=1), y = AR(1) / persistence RMSE, log scale.
-   *  Below the diagonal y=x means the controller's forecast beats the dataset forecast.
-   *  Marked sites: best scheduling 33/59, worst 9/3, and the scale-outlier 62. */
+   *  Difference curve: diff = controller forecast RMSE − SE(k=1) RMSE per site,
+   *  ranked ascending (AR(1) primary, monotonic); persistence drawn on the same
+   *  order. Zero line = parity with the dataset forecast; below zero the
+   *  controller forecast is more accurate. asinh y-scale keeps the small
+   *  per-site differences readable while containing the #62 scale-outlier.
+   *  Marked sites: best scheduling 33/59, worst 9/3, scale-outlier 62. */
   import { onMount } from 'svelte';
   import Plot from './Plot.svelte';
-  import { palette } from '../../lib/palette';
+  import { palette, seriesFor } from '../../lib/palette';
 
   type Metrics = { rmse: number; mae: number; bias: number; r2: number };
   type SiteRow = { site: number; n: number; ar1: Metrics; se: Metrics; persist: Metrics };
 
   const MARKED = new Set([33, 59, 9, 3, 62]);
+  const asinh = (x: number) => Math.asinh(x);
 
   let traces = $state<any[]>([]);
   let layout = $state<Record<string, any>>({});
@@ -21,81 +25,83 @@
     const payload = await res.json();
     const sites: SiteRow[] = payload.sites;
 
-    const xmax = Math.max(...sites.map((s) => s.se.rmse)) * 1.2;
-    const ymax = Math.max(...sites.map((s) => Math.max(s.ar1.rmse, s.persist.rmse))) * 1.2;
-    const lo = 0.08;
+    const diff = (s: SiteRow, c: 'ar1' | 'persist') => s[c].rmse - s.se.rmse;
+    const order = [...sites].sort((a, b) => diff(a, 'ar1') - diff(b, 'ar1'));
 
-    const labels = sites.map((s) => (MARKED.has(s.site) ? `#${s.site}` : ''));
-    const cust = sites.map((s) => [
-      s.site,
-      s.n,
-      s.ar1.rmse.toFixed(2),
-      String(s.ar1.r2),
-      s.se.rmse.toFixed(2),
-      String(s.se.r2),
-      s.persist.rmse.toFixed(2),
-      String(s.persist.r2),
-    ]);
+    const x = order.map((s) => `#${s.site}`);
+    const labels = order.map((s) => (MARKED.has(s.site) ? `#${s.site}` : ''));
+    const mkCust = (c: 'ar1' | 'persist') =>
+      order.map((s) => [
+        s.site,
+        s.n,
+        s[c].rmse.toFixed(2),
+        String(s[c].r2),
+        s.se.rmse.toFixed(2),
+        diff(s, c).toFixed(2),
+      ]);
     const tpl =
       '<b>site %{customdata[0]}</b> (n=%{customdata[1]})<br>' +
-      '%{fullData.name}: rmse %{y:.2f}<br>' +
-      'SE(k=1) reference: rmse %{customdata[4]} · r² %{customdata[5]}<extra></extra>';
+      '%{fullData.name}: RMSE %{customdata[2]} · r² %{customdata[3]}<br>' +
+      'SE(k=1) RMSE: %{customdata[4]} kWh<br>diff: %{customdata[5]} kWh<extra></extra>';
 
+    const ticks = [-500, -100, -30, -10, -3, -1, 0, 1, 3, 10, 30, 100, 500];
     traces = [
       {
-        name: 'y = x (equal RMSE)',
+        name: 'zero (= SE forecast)',
         type: 'scatter',
         mode: 'lines',
-        x: [lo, xmax],
-        y: [lo, xmax],
-        line: { color: palette.faint, dash: 'dash' },
+        x,
+        y: order.map(() => 0),
+        line: { color: palette.faint, dash: 'dot', width: 1.2 },
         hoverinfo: 'skip',
       },
       {
         name: 'AR(1) — S_AR actual',
         type: 'scatter',
-        mode: 'markers',
-        x: sites.map((s) => s.se.rmse),
-        y: sites.map((s) => s.ar1.rmse),
+        mode: 'lines+markers',
+        x,
+        y: order.map((s) => asinh(diff(s, 'ar1'))),
+        line: { color: seriesFor['S_AR'], width: 1.4 },
+        marker: { color: seriesFor['S_AR'], size: 5 },
         text: labels,
         textposition: 'middle right',
         textfont: { size: 10, color: palette.ink },
-        marker: { color: palette.ours[0], size: 7 },
-        customdata: cust,
+        customdata: mkCust('ar1'),
         hovertemplate: tpl,
       },
       {
         name: 'persistence',
         type: 'scatter',
-        mode: 'markers',
-        x: sites.map((s) => s.se.rmse),
-        y: sites.map((s) => s.persist.rmse),
-        marker: { color: palette.paperLookahead[2], size: 5, opacity: 0.7 },
-        customdata: cust,
+        mode: 'lines+markers',
+        x,
+        y: order.map((s) => asinh(diff(s, 'persist'))),
+        line: { color: palette.paperLookahead[2], width: 1.1 },
+        marker: { color: palette.paperLookahead[2], size: 4, opacity: 0.7 },
+        customdata: mkCust('persist'),
         hovertemplate: tpl,
       },
     ];
     layout = {
+      legend: { orientation: 'h', y: 1.12, x: 0 },
+      hovermode: 'x',
+      margin: { l: 72, r: 30, t: 44, b: 56 },
       xaxis: {
-        type: 'log',
-        title: 'SE forecast RMSE (k=1, kWh)',
-        range: [Math.log10(lo), Math.log10(xmax)],
-        tickformat: '.1f',
+        type: 'category',
+        categoryorder: 'trace',
+        title: 'sites ranked by AR(1) − SE(k=1) RMSE',
+        showticklabels: false,
       },
       yaxis: {
-        type: 'log',
-        title: 'controller forecast RMSE (kWh)',
-        range: [Math.log10(lo), Math.log10(ymax)],
-        tickformat: '.1f',
+        title: 'controller RMSE − SE(k=1) RMSE (kWh, asinh)',
+        tickvals: ticks.map(asinh),
+        ticktext: ticks.map(String),
+        zeroline: false,
       },
-      legend: { orientation: 'h', y: 1.12, x: 0 },
-      hovermode: 'closest',
-      margin: { l: 72, r: 30, t: 44, b: 56 },
     };
     ready = true;
   });
 </script>
 
 {#if ready}
-  <Plot data={traces} {layout} height={420} ariaLabel="Controller one-step forecast comparison on log scale" />
+  <Plot data={traces} {layout} height={420} ariaLabel="Controller one-step forecast RMSE difference vs the dataset forecast" />
 {/if}
