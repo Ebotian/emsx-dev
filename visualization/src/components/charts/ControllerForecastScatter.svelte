@@ -1,11 +1,12 @@
 <script lang="ts">
   /** Controller one-step forecast comparison (test set, out-of-sample).
-   *  Difference curve: diff = controller forecast RMSE − SE(k=1) RMSE per site,
+   *  Difference curve: diff = SE(k=1) RMSE − controller forecast RMSE per site,
    *  ranked ascending (AR(1) primary, monotonic); persistence drawn on the same
-   *  order. Zero line = parity with the dataset forecast; below zero the
-   *  controller forecast is more accurate. asinh y-scale keeps the small
-   *  per-site differences readable while containing the #62 scale-outlier.
-   *  Marked sites: best scheduling 33/59, worst 9/3, scale-outlier 62. */
+   *  order. Zero line = parity with the dataset forecast; ABOVE zero the
+   *  controller forecast is more accurate (consistent with the other external
+   *  comparison charts: diff = baseline − ours, above zero = ours better).
+   *  asinh y-scale keeps the small per-site differences readable while
+   *  containing the #62 scale-outlier. Marked sites: best 33/59, worst 9/3. */
   import { onMount } from 'svelte';
   import Plot from './Plot.svelte';
   import { palette, seriesFor } from '../../lib/palette';
@@ -25,7 +26,7 @@
     const payload = await res.json();
     const sites: SiteRow[] = payload.sites;
 
-    const diff = (s: SiteRow, c: 'ar1' | 'persist') => s[c].rmse - s.se.rmse;
+    const diff = (s: SiteRow, c: 'ar1' | 'persist') => s.se.rmse - s[c].rmse;
     const order = [...sites].sort((a, b) => diff(a, 'ar1') - diff(b, 'ar1'));
 
     const x = order.map((s) => `#${s.site}`);
@@ -88,11 +89,11 @@
       xaxis: {
         type: 'category',
         categoryorder: 'trace',
-        title: 'sites ranked by AR(1) − SE(k=1) RMSE',
+        title: 'sites ranked by SE(k=1) − AR(1) RMSE',
         showticklabels: false,
       },
       yaxis: {
-        title: 'controller RMSE − SE(k=1) RMSE (kWh, asinh)',
+        title: 'SE(k=1) RMSE − controller RMSE (kWh, asinh)',
         tickvals: ticks.map(asinh),
         ticktext: ticks.map(String),
         zeroline: false,

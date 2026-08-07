@@ -19,7 +19,7 @@ import ForecastCurveBrowser from '../components/charts/ForecastCurveBrowser.svel
   </section>
   <section class="card">
     <h2 data-i18n="forecast.ctrlCompare">控制器一步预测对比（测试期，out-of-sample）</h2>
-    <p class="convention-note" data-i18n="forecast.ctrlCompareNote">纵轴 = 控制器一步预测 RMSE − 数据集 SE(k=1) RMSE（kWh，asinh 刻度），站点按 AR(1) 差值升序；零线下方 = 控制器预测更准。AR(1) 在 54/70 站点优于数据集 forecast；最差调度站点 #9/#3 上 SE forecast 反而更准；#62 为净出口离群（−465 kWh）</p>
+    <p class="convention-note" data-i18n="forecast.ctrlCompareNote">纵轴 = 数据集 SE(k=1) RMSE − 控制器一步预测 RMSE（kWh，asinh 刻度），站点按 SE−AR(1) 差值升序；零线上方 = 控制器预测更准。AR(1) 在 54/70 站点优于数据集 forecast；最差调度站点 #9/#3 上 SE forecast 反而更准；#62 为净出口离群（+465 kWh）</p>
     <ControllerForecastScatter client:load />
   </section>
   <section class="card">
