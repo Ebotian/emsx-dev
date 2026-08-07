@@ -1,20 +1,30 @@
 % !TEX program = xelatex
-\documentclass[12pt]{article}
-\usepackage[UTF8]{ctex}
-\usepackage[margin=2.5cm]{geometry}
+% arXiv 预印本风格（双栏紧凑）· 中文版
+\documentclass[10pt, twocolumn]{article}
+\usepackage[UTF8, scheme=plain]{ctex}
+\usepackage[margin=0.9in]{geometry}
 \usepackage{amsmath, amssymb}
 \usepackage[hidelinks]{hyperref}
 \usepackage{booktabs}
 \usepackage{enumitem}
+\usepackage{titlesec}
 
-\title{\textbf{文献调研：自适应可行最优自动编译调度控制器\\[0.3em]
-\large 相近任务的方向、主要工作与对我们的意义}}
-\author{调研记录}
-\date{\today}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2ex plus 0.3ex}{0.6ex}
+\titlespacing*{\subsection}{0pt}{1ex plus 0.2ex}{0.4ex}
+\setlength{\parskip}{0.15em}
+\setlist{nosep, leftmargin=1.4em}
+
+\title{\textbf{文献调研：自适应可行最优自动编译调度控制器}\\[0.4em]
+\large 相近任务的方向、主要工作与对我们的意义}
+\author{调研记录\\[0.2em]\small 工程实践导向 · 以现实问题解决为核心}
+\date{}
 
 \begin{document}
+\twocolumn[
+\begin{@twocolumnfalse}
 \maketitle
-
 \begin{abstract}
 本调研服务于"自适应可行最优自动编译调度控制器"项目的工程实践。目标不是学术综述，而是
 回答一个现实问题：\emph{在微电网/建筑/储能的能量调度问题上，我们想做的事（输入负载、政策、
@@ -22,10 +32,9 @@
 世界上已有的工作做到了哪一步、他们的方案与我们的差异、以及我们能借鉴什么。}
 每个方向按"方向概述 / 代表性工作 / 对我们的意义"组织，偏向工程可迁移性而非理论完备性。
 \end{abstract}
+\end{@twocolumnfalse}
+]
 
-\tableofcontents
-
-% ---------------------------------------------------------------------------
 \section{调研方向总览与检索方法}
 本调研覆盖五个方向（第 \ref{sec:sdp}--\ref{sec:framework} 节），检索以 arXiv API、
 GEFCom 系列、IEEE 期刊会议以及行业基准（EMSx、OpenEI 电价数据）为主。
@@ -146,7 +155,7 @@ akbari_stoch_robust}：实时电价（RTP）下用 RL 调度、微网动态定�
 \subsection{方向概述}
 纯学术文献对"嵌入式设备上的能量管理 + OTA 在线更新"覆盖较少（更常见于工程白皮书与
 行业方案）。可迁移的相关学术工作集中在\textbf{自适应 MPC}（在线辨识与更新）与
-\textbf{边缘/分布式部署}。这一方向的"文献空白"本身说明：我们的闭环 OTA 架构
+\textbf{嵌入式实时最优控制}。这一方向的"文献空白"本身说明：我们的闭环 OTA 架构
 是一个工程化的、被工业实践需要但未被学术系统化的点。
 
 \subsection{代表性工作}
@@ -171,6 +180,9 @@ Conic-TinyMPC 将 MPC 锥化改写并代码生成，在 STM32 级单片机实测
 完成；我们的"价值函数族 + 匹配选择 + OTA 推送"把自适应提升到\textbf{控制器族切换}层面。
 \item 嵌入式存贮价值函数表（我们估算 673$\times$11$\times$20$\times$4B $\approx$ 0.6MB）
 在文献中少见明确讨论——这是工程空白，也是我们的可交付设计点。
+\item 我们已实测：\textbf{价值函数价格失配惩罚达 22--78\%}（1$\times$ 训练部署到 40$\times$
+仅剩 38\% 收益）——"按部署电价训练/选择价值函数"是必要机制，与 CVXGEN/TinyMPC 的
+"结构$\rightarrow$求解器"编译范式结合，构成我们 OTA 自适应闭环的实证基础。
 \end{enumerate}
 
 % ---------------------------------------------------------------------------
@@ -178,8 +190,9 @@ Conic-TinyMPC 将 MPC 锥化改写并代码生成，在 STM32 级单片机实测
 
 \subsection{方向概述}
 "以（负载、政策、电价）为输入、自动生成最优控制器"的\textbf{元层次}工作在文献中刚起步。
-最接近的是强化学习（RL）自动训练控制器、以及近期基于大语言模型（LLM）的自动控制设计。
-我们提出的"结构解析 $\Rightarrow$ 机制选择 $\Rightarrow$ 编译 $\Rightarrow$ 验证闭环"
+最接近的是面向嵌入式优化的代码生成（CVXGEN 开创的"离线推导+在线极简求解器"范式）、
+以及近期基于大语言模型（LLM）的自动控制设计。我们提出的
+"结构解析 $\Rightarrow$ 机制选择 $\Rightarrow$ 编译 $\Rightarrow$ 验证闭环"
 尚无直接对应物。
 
 \subsection{代表性工作}
