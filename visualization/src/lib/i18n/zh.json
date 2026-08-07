@@ -18,7 +18,7 @@
     "curves": "调度-预测曲线",
     "curvesNote": "每站点测试期窗口的实际净需求、AR(1) 一步预测与 persistence；站点可切换",
     "forecastErr": "一步预测误差对比",
-    "forecastErrNote": "测试期窗口内 AR(1) 与 persistence（上一时刻值）的一步预测 RMSE 逐站点对比；柱越短预测越好"
+    "forecastErrNote": "测试期窗口内一步预测 RMSE 差值（persistence − AR(1)）逐站点曲线，按差值升序；零线上方表示 AR(1) 更优"
   },
   "aemo": {
     "title": "AEMO 数据集验证",
@@ -26,7 +26,7 @@
     "curves": "调度-预测曲线",
     "curvesNote": "每区域测试期窗口的实际净需求、AR(1) 一步预测与 persistence；区域可切换",
     "forecastErr": "一步预测误差对比",
-    "forecastErrNote": "测试期窗口内 AR(1) 与 persistence（上一时刻值）的一步预测 RMSE 逐区域对比；柱越短预测越好"
+    "forecastErrNote": "测试期窗口内一步预测 RMSE 差值（persistence − AR(1)）逐区域曲线，按差值升序；零线上方表示 AR(1) 更优"
   },
   "index": {
     "title": "EMSx 微电网电池控制 — 审计与在线控制研究",

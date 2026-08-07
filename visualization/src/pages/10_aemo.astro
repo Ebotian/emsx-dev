@@ -13,7 +13,7 @@ import ExternalCurveBrowser from '../components/charts/ExternalCurveBrowser.svel
   </section>
   <section class="card">
     <h2 data-i18n="aemo.forecastErr">一步预测误差对比</h2>
-    <p class="convention-note" data-i18n="aemo.forecastErrNote">测试期窗口内 AR(1) 与 persistence（上一时刻值）的一步预测 RMSE 逐区域对比；柱越短预测越好</p>
+    <p class="convention-note" data-i18n="aemo.forecastErrNote">测试期窗口内一步预测 RMSE 差值（persistence − AR(1)）逐区域曲线，按差值升序；零线上方表示 AR(1) 更优</p>
     <ForecastErrorChart client:load dataUrl="/data/aemo/forecast_error.json" />
   </section>
   <section class="card">

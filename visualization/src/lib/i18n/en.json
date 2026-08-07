@@ -18,7 +18,7 @@
     "curves": "Dispatch-forecast curves",
     "curvesNote": "Actual net demand, AR(1) 1-step prediction and persistence over each site's test window; site switchable",
     "forecastErr": "One-step Forecast Error",
-    "forecastErrNote": "Per-site one-step forecast RMSE over the test window: AR(1) vs persistence (previous value); shorter bars are better"
+    "forecastErrNote": "Per-site one-step forecast RMSE difference (persistence − AR(1)) over the test window, sorted ascending; above zero means AR(1) is better"
   },
   "aemo": {
     "title": "AEMO Dataset Validation",
@@ -26,7 +26,7 @@
     "curves": "Dispatch-forecast curves",
     "curvesNote": "Actual net demand, AR(1) 1-step prediction and persistence over each region's test window; region switchable",
     "forecastErr": "One-step Forecast Error",
-    "forecastErrNote": "Per-region one-step forecast RMSE over the test window: AR(1) vs persistence (previous value); shorter bars are better"
+    "forecastErrNote": "Per-region one-step forecast RMSE difference (persistence − AR(1)) over the test window, sorted ascending; above zero means AR(1) is better"
   },
   "index": {
     "title": "EMSx Microgrid Battery Control — Audit & Online Control Study",
