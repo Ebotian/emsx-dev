@@ -313,17 +313,28 @@ for site in SITE_IDS
         c_rp, _, _, _ = replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, :rp, buy_by_slot, sell_by_slot)
         c_sdp, u_seq, soc_seq, cost_seq = replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, :sdp, buy_by_slot, sell_by_slot)
 
-        # dispatch-forecast curves: first 2 days of test
+        # dispatch-forecast curves: first 2 days of test.
+        # All three series are aligned to the TARGET slot t (the value z_t):
+        #   actual[t]  = z_t
+        #   persist[t] = z_{t-1}                 (1-step persistence forecast of z_t)
+        #   ar1[t]     = alpha[tau(t-1)]*z_{t-1} + beta[tau(t-1)]
+        # The t=1 "previous" value is the last training sample (series is
+        # contiguous across the split), matching the main project's se/ar1
+        # alignment so the vertical gap to actual is the 1-step forecast error.
         w = min(CURVE_WINDOW, length(test_df.z) - 1)
         actual = Float64.(test_df.z[1:w+1])
-        ar1 = Float64[]
-        persist = Float64[]
+        ar1 = Float64[]; persist = Float64[]
         tau_te2 = [week_slot(string(ts), N_SLOTS) for ts in test_df.timestamp]
-        for t in 1:w
-            τ = tau_te2[t]
-            z_t = clamp(actual[t], z_min, z_max)
-            push!(ar1, alpha[τ] * z_t + beta[τ])
-            push!(persist, actual[t])
+        # t=1: previous value = last training sample (train/test are contiguous)
+        z_prev = clamp(Float64(train_df.z[end]), z_min, z_max)
+        τ_prev = week_slot(string(train_df.timestamp[end]), N_SLOTS)
+        push!(persist, Float64(train_df.z[end]))
+        push!(ar1, alpha[τ_prev] * z_prev + beta[τ_prev])
+        for t in 2:w+1
+            z_prev = clamp(actual[t-1], z_min, z_max)
+            τ_prev = tau_te2[t-1]
+            push!(persist, actual[t-1])
+            push!(ar1, alpha[τ_prev] * z_prev + beta[τ_prev])
         end
 
         r = Dict(

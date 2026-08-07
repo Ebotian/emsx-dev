@@ -73,6 +73,9 @@
 - zsh 远程 shell 不做未加引号参数词分割，批量站点号曾作为单个参数传入（`isdir` 失败 → 0 站点）——本地 bash 构造后分别 ssh。
 - 聚合脚本相对路径（`../../visualization` 越级）修正为 `../visualization`。
 
+### 3.6 调度-预测曲线对齐（persistence 曾与 actual 完全重合）
+外部页曲线最初将 persistence 存为 `persist[t] = z(t)`，而 actual 同位置也是 `z(t)` → 两条线逐点相同、persistence 线无信息量；且 ar1 画在"决策时刻"而非"被预测目标时刻"。修正：三个序列统一对齐到**目标时刻 t**——`actual[t]=z_t`、`persist[t]=z_{t-1}`（一步 persistence 预测）、`ar1[t]=α(τ_{t-1})·z_{t-1}+β(τ_{t-1})`（t=1 用训练末值），与主项目 `controller_forecast.jl` 的 `se/ar1` 对齐语义一致；两线对 actual 的垂直差即一步预测误差。两个数据集已重跑（cost/gain 不变），页面网桥目检确认 persistence 线滞后一格。
+
 ---
 
 ## 4. 下一步
