@@ -1,14 +1,20 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ExternalGainChart from '../components/charts/ExternalGainChart.svelte';
+import ForecastErrorChart from '../components/charts/ForecastErrorChart.svelte';
 import ExternalCurveBrowser from '../components/charts/ExternalCurveBrowser.svelte';
 ---
 
 <BaseLayout title="AEMO Validation">
   <section class="card">
     <h2 data-i18n="aemo.title">AEMO 数据集验证</h2>
-    <p class="convention-note" data-i18n="aemo.note">NEM 5 区域（5min 净需求+电价）；S_AR / R_P 相对 dummy 的 gain；TOU 价差、物理 SOC 回放</p>
+    <p class="convention-note" data-i18n="aemo.note">NEM 5 区域；原始 5min 数据按 30min 重采样（14 天，不足 6 个月标准，降级演示）；区域典型电价时刻表计价；S_AR / R_P 相对 dummy 的 gain</p>
     <ExternalGainChart client:load dataUrl="/data/aemo/per_site_gain.json" />
+  </section>
+  <section class="card">
+    <h2 data-i18n="aemo.forecastErr">一步预测误差对比</h2>
+    <p class="convention-note" data-i18n="aemo.forecastErrNote">测试期窗口内 AR(1) 与 persistence（上一时刻值）的一步预测 RMSE 逐区域对比；柱越短预测越好</p>
+    <ForecastErrorChart client:load dataUrl="/data/aemo/forecast_error.json" />
   </section>
   <section class="card">
     <h2 data-i18n="aemo.curves">调度-预测曲线</h2>

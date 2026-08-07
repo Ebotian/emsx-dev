@@ -1,0 +1,27 @@
+[
+ {
+  "site": "NSW1",
+  "persist_rmse": 327820.186,
+  "ar1_rmse": 140449.479
+ },
+ {
+  "site": "QLD1",
+  "persist_rmse": 239375.161,
+  "ar1_rmse": 107955.101
+ },
+ {
+  "site": "SA1",
+  "persist_rmse": 101462.076,
+  "ar1_rmse": 74301.624
+ },
+ {
+  "site": "TAS1",
+  "persist_rmse": 32962.442,
+  "ar1_rmse": 21759.971
+ },
+ {
+  "site": "VIC1",
+  "persist_rmse": 266527.184,
+  "ar1_rmse": 123602.726
+ }
+]

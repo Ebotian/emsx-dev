@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ExternalGainChart from '../components/charts/ExternalGainChart.svelte';
+import ForecastErrorChart from '../components/charts/ForecastErrorChart.svelte';
 import ExternalCurveBrowser from '../components/charts/ExternalCurveBrowser.svelte';
 ---
 
@@ -9,6 +10,11 @@ import ExternalCurveBrowser from '../components/charts/ExternalCurveBrowser.svel
     <h2 data-i18n="ausgrid.title">Ausgrid 数据集验证</h2>
     <p class="convention-note" data-i18n="ausgrid.note">300 户澳洲家庭（30min 净需求，2010-07~2013-06）；S_AR / R_P 相对 dummy 的 gain；TOU 电价、物理 SOC 回放</p>
     <ExternalGainChart client:load dataUrl="/data/ausgrid/per_site_gain.json" />
+  </section>
+  <section class="card">
+    <h2 data-i18n="ausgrid.forecastErr">一步预测误差对比</h2>
+    <p class="convention-note" data-i18n="ausgrid.forecastErrNote">测试期窗口内 AR(1) 与 persistence（上一时刻值）的一步预测 RMSE 逐站点对比；柱越短预测越好</p>
+    <ForecastErrorChart client:load dataUrl="/data/ausgrid/forecast_error.json" />
   </section>
   <section class="card">
     <h2 data-i18n="ausgrid.curves">调度-预测曲线</h2>

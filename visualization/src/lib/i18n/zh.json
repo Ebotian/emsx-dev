@@ -16,13 +16,17 @@
     "title": "Ausgrid 数据集验证",
     "note": "300 户澳洲家庭（30min 净需求，2010-07~2013-06）；S_AR / R_P 相对 dummy 的 gain；TOU 电价、物理 SOC 回放",
     "curves": "调度-预测曲线",
-    "curvesNote": "每站点测试期窗口的实际净需求、AR(1) 一步预测与 persistence；站点可切换"
+    "curvesNote": "每站点测试期窗口的实际净需求、AR(1) 一步预测与 persistence；站点可切换",
+    "forecastErr": "一步预测误差对比",
+    "forecastErrNote": "测试期窗口内 AR(1) 与 persistence（上一时刻值）的一步预测 RMSE 逐站点对比；柱越短预测越好"
   },
   "aemo": {
     "title": "AEMO 数据集验证",
     "note": "NEM 5 区域；原始 5min 数据按 30min 重采样（14 天，不足 6 个月标准，降级演示）；区域典型电价时刻表计价；S_AR / R_P 相对 dummy 的 gain",
     "curves": "调度-预测曲线",
-    "curvesNote": "每区域测试期窗口的实际净需求、AR(1) 一步预测与 persistence；区域可切换"
+    "curvesNote": "每区域测试期窗口的实际净需求、AR(1) 一步预测与 persistence；区域可切换",
+    "forecastErr": "一步预测误差对比",
+    "forecastErrNote": "测试期窗口内 AR(1) 与 persistence（上一时刻值）的一步预测 RMSE 逐区域对比；柱越短预测越好"
   },
   "index": {
     "title": "EMSx 微电网电池控制 — 审计与在线控制研究",
