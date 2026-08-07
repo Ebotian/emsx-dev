@@ -1,7 +1,9 @@
 <script lang="ts">
-  /** External dataset: per-site final-result gains (S_AR vs R_P vs dummy).
-   *  Parallel to PerSiteGainChart but for a validation dataset: gain =
-   *  dummy_cost - controller_cost, sorted by site or by S_AR gain. */
+  /** External dataset: S_AR vs R_P gain difference, sorted monotonically.
+   *  diff = S_AR gain − R_P gain (AUD, both relative to dummy), sites ranked
+   *  ascending. Above the zero line S_AR saves more than R_P; below, R_P wins.
+   *  The per-site difference is tiny (both controllers share the same
+   *  price-driven schedule), so the axis shows the small real spread. */
   import { onMount } from 'svelte';
   import Plot from './Plot.svelte';
   import { palette, seriesFor } from '../../lib/palette';
@@ -10,10 +12,11 @@
 
   let { dataUrl = '/data/ausgrid/per_site_gain.json' }: { dataUrl?: string } = $props();
   let rows: Row[] = [];
-  let sortBy = $state<'site' | 'gain'>('site');
   let data = $state<any[]>([]);
   let layout = $state<Record<string, any>>({});
   let ready = $state(false);
+
+  const diff = (r: Row) => (r.gains['S_AR'] ?? 0) - (r.gains['R_P'] ?? 0);
 
   onMount(async () => {
     const res = await fetch(dataUrl, { cache: 'no-store' });
@@ -23,35 +26,28 @@
 
   $effect(() => {
     if (!ready) return;
-    const order = [...rows].sort((a, b) =>
-      sortBy === 'site'
-        ? String(a.site).localeCompare(String(b.site), undefined, { numeric: true })
-        : (a.gains['S_AR'] ?? 0) - (b.gains['S_AR'] ?? 0),
-    );
+    const order = [...rows].sort((a, b) => diff(a) - diff(b));
     const x = order.map((r) => `#${r.site}`);
+    const y = order.map(diff);
+    const colors = order.map((r) => (diff(r) > 0 ? seriesFor['S_AR'] : seriesFor['R_P']));
     data = [
       {
         type: 'scatter',
-        mode: 'markers',
-        name: 'S_AR gain',
+        mode: 'lines+markers',
+        name: 'S_AR − R_P gain',
         x,
-        y: order.map((r) => r.gains['S_AR'] ?? 0),
-        marker: { color: seriesFor['S_AR'], size: 6 },
-        hovertemplate: '<b>site %{x}</b><br>S_AR gain: %{y:.1f} AUD<extra></extra>',
-      },
-      {
-        type: 'scatter',
-        mode: 'markers',
-        name: 'R_P gain',
-        x,
-        y: order.map((r) => r.gains['R_P'] ?? 0),
-        marker: { color: seriesFor['R_P'], size: 5, opacity: 0.8 },
-        hovertemplate: '<b>site %{x}</b><br>R_P gain: %{y:.1f} AUD<extra></extra>',
+        y,
+        line: { color: palette.faint, width: 1.2 },
+        marker: { color: colors, size: 5 },
+        hovertemplate:
+          '<b>site %{x}</b><br>S_AR gain: %{customdata[0]:.2f} AUD<br>' +
+          'R_P gain: %{customdata[1]:.2f} AUD<br>diff: %{y:.3f} AUD<extra></extra>',
+        customdata: order.map((r) => [r.gains['S_AR'], r.gains['R_P']]),
       },
       {
         type: 'scatter',
         mode: 'lines',
-        name: 'dummy (zero gain)',
+        name: 'zero (controllers equal)',
         x,
         y: order.map(() => 0),
         line: { color: palette.faint, dash: 'dot', width: 1.2 },
@@ -66,21 +62,19 @@
       xaxis: {
         type: 'category',
         categoryorder: 'trace',
-        title: sortBy === 'site' ? 'site id →' : 'sites ranked by S_AR gain',
+        title: 'sites ranked by S_AR − R_P gain',
         showticklabels: false,
       },
-      yaxis: { title: 'gain = dummy − cost (AUD)' },
+      yaxis: { title: 'diff = S_AR gain − R_P gain (AUD)' },
     };
   });
 </script>
 
 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
-  <select bind:value={sortBy} style="font:inherit;font-size:13px;padding:3px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;">
-    <option value="site">按站点号排序</option>
-    <option value="gain">按 S_AR gain 排序</option>
-  </select>
-  <span style="font-size:12px;color:#6b7280;">gain = dummy 成本 − 控制器成本（节省额）</span>
+  <span style="font-size:12px;color:#6b7280;">
+    diff = S_AR gain − R_P gain（AUD，均相对 dummy）；&gt; 0（零线上方）表示 S_AR 更优；按差值升序
+  </span>
 </div>
 {#if ready}
-  <Plot {data} {layout} height={420} ariaLabel="Per-site gains of S_AR and R_P over dummy" />
+  <Plot {data} {layout} height={420} ariaLabel="S_AR vs R_P gain difference (AUD), sorted ascending" />
 {/if}

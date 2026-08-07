@@ -36,9 +36,10 @@
 - 结果回传 `external_data/aemo/results/`（5 份）
 
 ### 1.5 可视化（✅ build + 网桥目检）
-- 09_ausgrid 页：per_site_gain.json（300 户，与原始结果核对一致）+ curves.json + **forecast_error.json（一步预测 RMSE 对比新卡片）**；网桥目检：渲染、300 站点下拉切换、按 gain / AR1-persist 比排序（单调）
-- 10_aemo 页：per_site_gain.json（5 区域）+ curves.json + forecast_error.json；网桥目检：渲染、5 区域下拉切换、排序（NSW1<QLD1<VIC1<TAS1<SA1 比值 0.43→0.73）
-- **一步预测误差对比卡**（两页新增）：逐站点 persistence（上一时刻值）vs AR(1) 的一步预测 RMSE 分组柱状图——AEMO 区域 AR1 比 persistence 好 1.4-2.3×（RMSE 比 0.43-0.73，误差集中在晨/晚爬坡时段，AR1 的分时段截距 β(τ) 记忆日循环）；Ausgrid 家用 AR1 仅略优（均值 0.951，噪声主导）
+- 09_ausgrid 页：per_site_gain.json（300 户，与原始结果核对一致）+ curves.json + **forecast_error.json（一步预测 RMSE 差值曲线新卡片）**；网桥目检：渲染、300 站点下拉切换
+- 10_aemo 页：per_site_gain.json（5 区域）+ curves.json + forecast_error.json；网桥目检：渲染、5 区域下拉切换
+- **S_AR−R_P gain 差值曲线**（两页 gain 卡片改为差值形式）：diff = S_AR gain − R_P gain（AUD，均相对 dummy），按差值升序的单调曲线 + 零线，按符号着色（S_AR 优蓝 / R_P 优灰）——Ausgrid 300 户中 100 户 S_AR 更优、187 户 R_P 更优、13 户相等，差值 −0.65..+0.40 AUD（两者高度接近，差值极小但可见）；AEMO 5 区域差值 −8.4k..+37k
+- **一步预测误差对比卡**（两页新增）：diff = persistence RMSE − AR(1) RMSE（kW），按差值升序单调曲线——AEMO 区域 AR1 比 persistence 好 1.4-2.3×（RMSE 比 0.43-0.73，误差集中在晨/晚爬坡时段，AR1 的分时段截距 β(τ) 记忆日循环）；Ausgrid 家用 AR1 略优（中位差值 +0.02 kW，49/300 户 persistence 更优）
 - `pnpm build` 退出 0（11 页）；i18n 中英双语（AEMO 文案注明 14 天降级与计价口径）
 
 ### 1.6 git 提交树
