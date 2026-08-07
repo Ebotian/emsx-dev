@@ -28,6 +28,10 @@ const MAX_VI_ITERS = 30
 const VI_TOL = 1e-3
 const MARGIN = 0.5
 const CURVE_WINDOW = 2 * N_SLOTS  # 2 days for dispatch-forecast curves
+# FORECAST_LAMBDA in [0,1]: blends the S_AR decision forecast toward perfect
+# foresight, ẑ = (1-λ)·AR(1) + λ·z_actual(t+1), to trace the benefit-vs-accuracy
+# curve (λ=0 current, λ=1 one-step oracle). Read from ENV (default "0").
+const FORECAST_LAMBDA = parse(Float64, get(ENV, "FORECAST_LAMBDA", "0"))
 
 SITE_IDS = isempty(ARGS[3:end]) ? sort(readdir(DATASET_DIR)) : ARGS[3:end]
 SITE_IDS = filter(s -> isdir(joinpath(DATASET_DIR, s)) && s != "results", SITE_IDS)
@@ -200,6 +204,7 @@ function replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, ctrl, bu
     n = length(z)
     soc = 0.0
     cost_total = 0.0
+    wmae_dec = 0.0; n_dec = 0
     vf_arr = vf.functions
     soc_axis = model.states.axis[1]
     z_axis = model.states.axis[2]
@@ -213,7 +218,16 @@ function replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, ctrl, bu
             u = 0.0
         else
             z_next = ctrl === :sdp ? alpha[τ] * z_t + beta[τ] : z_t
+            # FORECAST_LAMBDA sweep: blend the S_AR decision forecast toward the
+            # one-step oracle, ẑ = (1-λ)·AR(1) + λ·z(t+1) (decision only).
+            if ctrl === :sdp && FORECAST_LAMBDA > 0.0
+                z_oracle = t < n ? clamp(z[t+1], z_min, z_max) : z_t
+                z_next = (1.0 - FORECAST_LAMBDA) * z_next + FORECAST_LAMBDA * z_oracle
+            end
             z_next = clamp(z_next, z_min, z_max)
+            if t < n
+                wmae_dec += buy_slot[τ] * abs(z_next - z[t+1]); n_dec += 1
+            end
             itp = itps[τ]
             # physical action bounds: keep next SOC in [0,1] (no free energy)
             lo = max(-soc * eta_d * capacity / (power * dt), -1.0)
@@ -247,7 +261,7 @@ function replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, ctrl, bu
         soc = soc_new
         u_seq[t] = u; soc_seq[t] = soc; cost_seq[t] = c
     end
-    return cost_total, u_seq, soc_seq, cost_seq
+    return cost_total, u_seq, soc_seq, cost_seq, (n_dec > 0 ? wmae_dec / n_dec : 0.0)
 end
 
 # ---------------------------------------------------------------------------
@@ -309,9 +323,9 @@ for site in SITE_IDS
         )
         vf = compute_periodic_value_functions(model)
 
-        c_dummy, _, _, _ = replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, :dummy, buy_by_slot, sell_by_slot)
-        c_rp, _, _, _ = replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, :rp, buy_by_slot, sell_by_slot)
-        c_sdp, u_seq, soc_seq, cost_seq = replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, :sdp, buy_by_slot, sell_by_slot)
+        c_dummy, _, _, _, _ = replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, :dummy, buy_by_slot, sell_by_slot)
+        c_rp, _, _, _, _ = replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, :rp, buy_by_slot, sell_by_slot)
+        c_sdp, u_seq, soc_seq, cost_seq, wmae_dec = replay(model, vf, alpha, beta, z_min, z_max, test_df, battery, :sdp, buy_by_slot, sell_by_slot)
 
         # dispatch-forecast curves: first 2 days of test.
         # All three series are aligned to the TARGET slot t (the value z_t):
@@ -341,6 +355,7 @@ for site in SITE_IDS
             "site" => site,
             "cost" => Dict("dummy" => round(c_dummy; digits=2), "rp" => round(c_rp; digits=2), "sdp" => round(c_sdp; digits=2)),
             "gain" => Dict("rp" => round(c_dummy - c_rp; digits=2), "sdp" => round(c_dummy - c_sdp; digits=2)),
+            "wmae_dec" => round(wmae_dec; digits=4),
             "curves" => Dict("actual" => round.(actual, digits=3), "ar1" => round.(ar1, digits=3), "persist" => round.(persist, digits=3)),
         )
         open(joinpath(DATASET_DIR, "results", "$site.json"), "w") do io
