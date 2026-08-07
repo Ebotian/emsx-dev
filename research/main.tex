@@ -53,11 +53,17 @@ AR(1)$\rightarrow$AR(2) 的依赖扩展收益几乎为零。这是我们工作�
 Jones 与 Peet 处理了目标函数含 \emph{supremum（峰值）项}的动态规划——这正是"峰值需求费"
 这类跨时段耦合成本的理论机制。我们的调研确认：这是把调度目标从"纯能量成本"推广到
 "能量 + 峰值费"时，文献给出的数学工具。
+\item \textbf{近似动态规划（ADP）的嵌入式友好策略形式} \cite{cheng_multi_scale_dp,
+liu_stochastic_hems_adp, diaz_dp_aging}：Cheng \& Powell 的多尺度 DP（调频+套利联合）、
+Liu 等的家庭 ADP 策略学习、D\'iaz 等把电池老化纳入 DP 状态——共同证明了
+"策略 = 状态$\rightarrow$动作查表/函数逼近、可离线训练、在线轻评估"正是嵌入式部署的理想形态。
 \item \textbf{MPC 用于储能与需求费管理} \cite{raoufat_bess_demand_charge,
-cortes_economic_mpc_demand, lipka_datadriven_mpc_battery}：带需求费目标的储能 MPC、
-数据驱动 MPC 等，展示了 MPC 一族在"时域耦合成本"下的处理方式（滚动时域内显式建模 max 项）。
-\item \textbf{微电网/能量枢纽的分布式 MPC} \cite{dao_hierarchical_mpc_microgrid,
-lefebure_distributed_mpc_energyhubs}：多主体协调与分层预测控制，对"多站点/多建筑"部署有意义。
+cortes_economic_mpc_demand, lipka_datadriven_mpc_battery, khatamianfar_mpc_wind,
+jovanovic_mpc_residential}：带需求费目标的储能 MPC、数据驱动 MPC、风储与高波动电价下的
+MPC——展示了 MPC 一族在"时域耦合成本 + 预测轨迹"下的处理方式。
+\item \textbf{微电网/能量枢纽的分布式与分层 MPC} \cite{dao_hierarchical_mpc_microgrid,
+lefebure_distributed_mpc_energyhubs, parisio_microgrid_mpc}：多主体协调、分层预测控制与
+真实微网实验验证，对"多站点/多建筑部署"与"MPC 作为机制族成员"有意义。
 \end{itemize}
 
 \subsection{对我们的意义}
@@ -80,13 +86,18 @@ Jones \& Peet 的 supremum-DP 与 MPC 滚动时域是两条候选机制，恰好
 
 \subsection{代表性工作}
 \begin{itemize}
-\item \textbf{GEFCom2014} \cite{gefcom2014}：全球能源预测竞赛，负荷/价格/风/光伏多赛道，
+\item \textbf{GEFCom2014} \cite{gefcom2014, hong_gefcom_prob}：全球能源预测竞赛，负荷/价格/风/光伏多赛道，
 确立了点预测与概率预测的评价框架。EMSx 论文明确其预测方法（AR + 随机森林）受 GEFCom2014
-顶级方法启发。
-\item \textbf{AMI 数据短期负荷预测} \cite{mansoor_stlf_ami}：基于高级计量基础设施数据，
-代表"数据可得性驱动方法"的工程路线。
-\item \textbf{套利中价格预测的不确定性折扣} \cite{bhattacharjee_uncertainty_arbitrage}：
-讨论确定性价格预测用于套利时如何折扣不确定性——与我们的"价格加权预测误差"视角直接相关。
+顶级方法启发；概率预测版本明确了"预测输出契约"（分位数/区间）。
+\item \textbf{轻量可解释的负荷预测} \cite{fan_hyndman_stlf, ziel_lasso_gefcom,
+mansoor_stlf_ami}：半参数加性模型、Lasso 分位数回归、AMI 数据方法——证明
+"线性/正则化方法 + 良好特征"即可达顶级性能，是嵌入式部署的首选复杂度档位。
+\item \textbf{电价预测综述} \cite{weron_price_forecast}：电价预测方法的权威地图与评测规范，
+对应我们"电价结构作为输入"的预测建模。
+\item \textbf{预测误差对套利收益的灵敏度} \cite{kiedanski_forecast_error,
+bhattacharjee_uncertainty_arbitrage}：定量分析负荷预测误差对储能套利收益的影响，
+证明"更准的预测不必然带来等比例收益提升"、以及价格预测不确定性如何折扣——
+与我们的"价格加权预测误差 $\Rightarrow$ 调度收益近似线性"实测直接对应。
 \end{itemize}
 
 \subsection{对我们的意义}
@@ -108,10 +119,17 @@ GEFCom 的负荷预测方法可直接迁移。
 \subsection{代表性工作}
 \begin{itemize}
 \item \textbf{净计量下的储能最优控制} \cite{hashmi_netmetering_control,
-hashmi_netmetering_lp}：Hashmi 等在净计量政策下用最优控制/线性规划求解储能调度，
-直接对应我们讨论的"禁止售电/净计量"成本结构。
-\item \textbf{净计量 + TOU 下家庭光伏储能容量} \cite{babu_netmetering_tou_solar}：
-政策参数（净计量比例、TOU 时段）对最优储能规模与运行的影响——政策作为优化输入的代表。
+hashmi_netmetering_lp, ratnam_netmetering}：Hashmi 等与 Ratnam 等在净计量政策下用最优控制/
+线性规划求解储能调度，并给出关键判据：\emph{平价净计量（买价=卖价且无分时价差）下储能无
+套利收益}——政策结构直接决定收益可行子空间的有无。
+\item \textbf{TOU/阶梯电价与家庭 PV-储能} \cite{zhang_tou_step, babu_netmetering_tou_solar}：
+不同电价结构 $\Rightarrow$ 不同优化模型形态与最优规模——"电价结构是优化问题的输入参数"的直接证据。
+\item \textbf{峰值需求费 + 电池衰减} \cite{vatanparvar_demand_charge,
+hou_degradation_linear, battery_degradation_scheduling, degradation_market}：需求费削减与
+可线性化的衰减-寿命模型（DOD 相关循环次数）——把"寿命代价"嵌入目标的可求解组件。
+\item \textbf{实时电价与随机/鲁棒处理} \cite{rl_storage_rtp, dynamic_pricing_microgrid,
+akbari_stoch_robust}：实时电价（RTP）下用 RL 调度、微网动态定价、以及日前+实时的
+随机-鲁棒混合建模范式——价格成为随机过程时的处理方式。
 \end{itemize}
 
 \subsection{对我们的意义}
@@ -133,10 +151,18 @@ hashmi_netmetering_lp}：Hashmi 等在净计量政策下用最优控制/线性�
 
 \subsection{代表性工作}
 \begin{itemize}
-\item \textbf{自适应 MPC} \cite{tanaskovic_adaptive_mpc}：约束线性时变系统的自适应 MPC，
-在线更新模型——对应我们"运行点漂移 $\Rightarrow$ 重拟合 $\Rightarrow$ 重部署"的自适应逻辑。
-\item \textbf{边缘协同的电池网络管理}（arXiv 检索池）与\textbf{分布式优化}：
-多设备边缘部署的优化协调，为"单片机薄执行器 + 远端编译器"提供分布式参考。
+\item \textbf{嵌入式实时最优控制的可行性证明} \cite{wang_boyd_fast_mpc}：
+Wang \& Boyd 将线性约束 MPC 转化为稀疏 QP，利用 KKT 结构离线预处理 + 在线迭代，
+把单步求解压到毫秒级——首次系统论证"小规模 MPC 可在微控制器上实时运行"。
+\item \textbf{自动代码生成（关键）} \cite{mattingley_cvxgen, mahajan_tinympc}：
+CVXGEN 开创"从凸问题描述自动生成嵌入式 C 求解器"（无动态内存、无第三方依赖）；
+Conic-TinyMPC 将 MPC 锥化改写并代码生成，在 STM32 级单片机实测毫秒级求解——
+"自动编译控制器"的成熟工程范式，与我们的目标最同构。
+\item \textbf{自适应 MPC 与安全学习} \cite{tanaskovic_adaptive_mpc, aswani_lbmpc}：
+约束 LTV 系统的自适应 MPC、以及"学习改进预测但保持硬约束安全"的 LBMPC——
+在线更新模型而不牺牲可行性的理论模板。
+\item \textbf{OTA 安全更新（关键）} \cite{halder_ota}：联网车辆 OTA 软件更新的完整安全
+链路（签名、差分分发、校验、回滚）——为我们的"部署后闭环更新控制器"提供工程安全模型。
 \end{itemize}
 
 \subsection{对我们的意义}
@@ -159,11 +185,20 @@ hashmi_netmetering_lp}：Hashmi 等在净计量政策下用最优控制/线性�
 \subsection{代表性工作}
 \begin{itemize}
 \item \textbf{AgenticControl：基于 LLM 的自动控制设计框架} \cite{agenticcontrol}：
-用大语言模型自动生成控制设计，是"自动编译控制器"思路的最新代表，但面向一般控制而非
-能量调度结构。
+用大语言模型多智能体流水线自动完成控制设计（建模、设计、整定、评估），是"自动编译
+控制器"思路的最新代表，但面向一般控制而非能量调度结构。
+\item \textbf{面向嵌入式优化的代码生成} \cite{mattingley_cvxgen, mahajan_tinympc}：
+CVXGEN 与 Conic-TinyMPC 证明"问题结构 $\Rightarrow$ 专用嵌入式求解器"的自动编译
+流水线可行（离线推导 + 在线极简求解）——我们把它从"手工指定的数学问题"上移到
+"负载/电价/政策结构"。
+\item \textbf{场景配置到控制器代码} \cite{schildbach_autompc}：AutoMPC 从场景化 MPC
+配置自动产出可部署代码——方法论上与我们的目标同构，但面向单一运动学模型族。
 \item \textbf{家庭能量管理的强化学习} \cite{gokhale_rl_hems, razghandi_seq2seq_qlearning}：
-RL 自动学习调度策略（含可解释性、序列预测 + Q-learning 的组合），代表"数据驱动自动
-生成控制器"路线。
+RL 自动学习调度策略（含可解释性、序列预测 + Q-learning），代表"数据驱动自动生成
+控制器"路线。
+\item \textbf{元学习自动调参} \cite{li_metalearning_mpc}：用元学习预训练 MPC 调参器，
+新工况少量数据即可快速整定——"结构自适应"中参数层的快速迁移（与我们的结构级
+自动编译互补）。
 \end{itemize}
 
 \subsection{对我们的意义}
@@ -178,15 +213,21 @@ RL 自动学习调度策略（含可解释性、序列预测 + Q-learning 的组
 % ---------------------------------------------------------------------------
 \section{总结：文献给我们的定位与空白}\label{sec:conclusion}
 \begin{enumerate}
-\item \textbf{已有、可借鉴}：可分离成本结构下的 SDP/MPC 储能调度（EMSx 验证）；
-峰值需求费的 DP/MPC 机制（Jones \& Peet、需求费 MPC）；净计量/TOU 政策下的储能控制
-（Hashmi 等）；负荷预测基准与工程方法（GEFCom、AMI）。
-\item \textbf{半空白、可贡献}：\emph{预测精度 $\Rightarrow$ 调度收益的定量关系}
-（价格加权、模型一致性——我们已实测，文献少见）；\emph{政策/成本结构变化时的自动重编译
-闭环}（OTA 自适应）——净计量文献停在"给定政策解一次"。
+\item \textbf{已有、可借鉴}：可分离成本结构下的 SDP/MPC/ADP 储能调度（EMSx 验证；
+ADP 的"策略形式"天然适合嵌入式）；峰值需求费的 DP/MPC 机制（Jones \& Peet、
+需求费 MPC）；净计量/TOU 政策下的储能控制与收益判据（Hashmi、Ratnam）；
+负荷/价格预测的基准与轻量方法（GEFCom、Weron、Fan \& Hyndman）；
+嵌入式实时最优控制的可行性（Wang \& Boyd）与\textbf{自动代码生成}（CVXGEN、TinyMPC）；
+OTA 安全更新链路（Halder）。
+\item \textbf{半空白、可贡献}：\emph{预测误差 $\Rightarrow$ 调度收益的定量关系}
+（Kiedanski 已做灵敏度分析，但未到"价格加权 + 模型一致性"层面——我们已实测，
+可贡献）；\emph{政策/成本结构变化时的自动重编译闭环}（OTA 自适应）——净计量文献
+停在"给定政策解一次"。
 \item \textbf{真正的空白}：\emph{以（负载、政策、电价）结构为输入、在结构族内自动选择
-求解机制、并用收益包络验证闭环的"自动编译控制器"}——LLM 自动控制与 RL 是邻近探索，
-但都没有"结构族 + 可行最优验证 + 嵌入式 OTA"的完整闭环。这是我们工作的定位。
+求解机制（SDP/增广 DP/MPC/RL 兜底）、自动代码生成部署产物、并用收益包络验证闭环的
+"自动编译调度控制器"}。CVXGEN/TinyMPC 证明了"结构$\rightarrow$求解器"的编译可行性，
+AutoMPC/AgenticControl 在向"配置$\rightarrow$控制器"推进，但都\textbf{没有}
+"结构族 + 可行最优验证 + 嵌入式 OTA 闭环"的完整组合。这是我们工作的定位。
 \end{enumerate}
 
 \bibliographystyle{plain}
